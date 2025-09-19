@@ -5,7 +5,7 @@
 - Node.js >= 18
 - Vite
 - React
-- React DOM
+- React router DOM
 
 ## Backend (en progreso)
 - Node.js >= 18
