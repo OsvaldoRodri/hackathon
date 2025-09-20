@@ -26,7 +26,7 @@ function App(): React.JSX.Element {
 
           {/* Inferior Izquierdo */}
           <div className="bottom-left">
-            <img src="/persona.png" alt="Persona realizando pagos de servicios" />
+            <img src="/persona.png?v=2" alt="Persona realizando pagos de servicios" />
           </div>
 
           {/* Inferior Derecho */}

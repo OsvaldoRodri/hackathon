@@ -150,7 +150,7 @@ function SignUp(): React.JSX.Element {
           
           <div className="animated-image-container">
             <div className="animated-image">
-              <img src="/persona.png" alt="Persona usando servicios de pago" />
+              <img src="/arrow.png" alt="flecha apuntando hacia abajo" />
             </div>
           </div>
         </div>
