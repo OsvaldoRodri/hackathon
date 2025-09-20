@@ -1,11 +1,7 @@
 import express from 'express';
 import { Recibo, Domicilio, Usuario } from '../models/index.js';
-import { WalletService } from '../services/walletService.js';
 
 const router = express.Router();
-
-// Instanciar el servicio de wallet
-const walletService = new WalletService();
 
 // GET /api/recibos - Obtener todos los recibos
 router.get('/', async (req, res) => {
@@ -119,10 +115,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/recibos/:id/pagar - Marcar recibo como pagado usando OpenPayments
+// PUT /api/recibos/:id/pagar - Marcar recibo como pagado
 router.put('/:id/pagar', async (req, res) => {
   try {
-    const { userId, walletCode } = req.body;
+    const { userId } = req.body;
     
     const recibo = await Recibo.findByPk(req.params.id, {
       include: [{ 
@@ -149,71 +145,34 @@ router.put('/:id/pagar', async (req, res) => {
     }
 
     // Validación básica de parámetros
-    if (!userId || !walletCode) {
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        error: 'userId y walletCode son requeridos para procesar el pago'
+        error: 'userId es requerido para procesar el pago'
       });
     }
 
-    // Obtener wallet del usuario pagador
-    const userWallet = await walletService.getUserWallet(parseInt(userId));
-    if (!userWallet) {
+    // Verificar que el usuario existe
+    const usuario = await Usuario.findByPk(parseInt(userId));
+    if (!usuario) {
       return res.status(400).json({
         success: false,
-        error: 'Usuario no tiene una wallet configurada'
+        error: 'Usuario no encontrado'
       });
     }
 
-    // Validar que el walletCode coincida con la wallet del usuario
-    if (userWallet.walletUrl !== walletCode) {
-      return res.status(400).json({
-        success: false,
-        error: 'El código de wallet no coincide con la wallet del usuario'
-      });
-    }
-
-    // Obtener wallet del tesorero
-    const treasurerWallet = await walletService.getTreasurerWallet();
-    if (!treasurerWallet) {
-      return res.status(500).json({
-        success: false,
-        error: 'No se encontró la wallet del tesorero. Contacte al administrador.'
-      });
-    }
-
-    // Procesar el pago usando OpenPayments
-    const paymentResult = await walletService.processPayment({
-      reciboId: parseInt(req.params.id),
-      senderUserId: parseInt(userId),
-      receiverUserId: treasurerWallet.userId,
-      amount: parseFloat(recibo.monto.toString()),
-      description: `Pago de ${recibo.concepto} - Recibo ${recibo.numero}`
+    // Simular procesamiento de pago (aquí podrías integrar con tu pasarela de pago)
+    // Por ahora, simplemente marcamos el recibo como pagado
+    await recibo.update({
+      estado: 'pagado',
+      fechaPago: new Date()
     });
 
-    if (paymentResult.success) {
-      // Marcar el recibo como pagado
-      await recibo.update({
-        estado: 'pagado',
-        fechaPago: new Date()
-      });
-
-      return res.json({
-        success: true,
-        data: recibo,
-        transaction: {
-          id: paymentResult.transactionId,
-          openPaymentsId: paymentResult.openPaymentsTransactionId
-        },
-        message: 'Pago procesado exitosamente usando OpenPayments'
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        error: paymentResult.error || 'Error al procesar el pago',
-        message: paymentResult.message
-      });
-    }
+    return res.json({
+      success: true,
+      data: recibo,
+      message: 'Pago procesado exitosamente'
+    });
 
   } catch (error) {
     console.error('Error al procesar pago:', error);

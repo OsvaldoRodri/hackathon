@@ -78,42 +78,8 @@ export interface Estadisticas {
   timestamp: string;
 }
 
-// Interfaces para Wallets y OpenPayments
-export interface Wallet {
-  id: number;
-  userId: number;
-  walletUrl: string;
-  balance: number;
-  isActive: boolean;
-  createdAt: string;
-  user?: Usuario;
-}
-
-export interface PaymentTransaction {
-  id: number;
-  reciboId: number;
-  senderWalletId: number;
-  receiverWalletId: number;
-  amount: number;
-  paymentPointer: string;
-  openPaymentsTransactionId?: string;
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
-  metadata?: any;
-  createdAt: string;
-  updatedAt: string;
-  senderWallet?: Wallet;
-  receiverWallet?: Wallet;
-}
-
-export interface CreateWalletRequest {
-  userId: number;
-  walletUrl: string;
-  publicKey: string;
-}
-
 export interface ProcessPaymentRequest {
   userId: number;
-  walletCode: string;
 }
 
 class ApiService {
@@ -183,31 +149,27 @@ class ApiService {
     }
   }
 
-  // Authentication methods (Note: Backend doesn't have auth endpoints yet, this is prepared for future implementation)
+  // Authentication methods
   async login(credentials: LoginRequest): Promise<ApiResponse<{ user: Usuario; token: string }>> {
-    // For now, simulate login with existing users from backend
     try {
-      // Get all users to find matching credentials
-      const users = await this.getUsuarios();
-      const user = users.data.find(u => u.email === credentials.email);
-      
-      if (user) {
-        // Simulate successful login
-        const token = `token-${user.id}-${Date.now()}`;
+      const response = await this.request<{ user: Usuario; token: string }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      });
+
+      if (response.success && response.data) {
+        // Guardar información del usuario en localStorage
+        const { user, token } = response.data;
         localStorage.setItem('userToken', token);
         localStorage.setItem('userEmail', user.email);
         localStorage.setItem('userRole', user.rol);
         localStorage.setItem('userId', user.id.toString());
-        
-        return {
-          success: true,
-          data: { user, token }
-        };
-      } else {
-        throw new Error('Credenciales inválidas');
       }
+
+      return response;
     } catch (error) {
-      throw new Error('Error al iniciar sesión');
+      console.error('Error en login:', error);
+      throw new Error('Error al iniciar sesión. Verifique sus credenciales.');
     }
   }
 
@@ -316,37 +278,6 @@ class ApiService {
 
   async getEstadisticas(): Promise<ApiResponse<Estadisticas>> {
     return this.request<Estadisticas>('/reportes/estadisticas');
-  }
-
-  // Wallet methods
-  async getUserWallet(userId: number): Promise<ApiResponse<Wallet>> {
-    return this.request<Wallet>(`/wallets/user/${userId}`);
-  }
-
-  async createWallet(walletData: CreateWalletRequest): Promise<ApiResponse<Wallet>> {
-    return this.request<Wallet>('/wallets', {
-      method: 'POST',
-      body: JSON.stringify(walletData),
-    });
-  }
-
-  async getTreasurerWallet(): Promise<ApiResponse<Wallet>> {
-    return this.request<Wallet>('/wallets/treasurer');
-  }
-
-  async getWalletTransactions(walletId: number): Promise<ApiResponse<PaymentTransaction[]>> {
-    return this.request<PaymentTransaction[]>(`/wallets/${walletId}/transactions`);
-  }
-
-  async validateWalletUrl(walletUrl: string): Promise<ApiResponse<{ isValid: boolean; walletInfo?: any }>> {
-    return this.request<{ isValid: boolean; walletInfo?: any }>('/wallets/validate', {
-      method: 'POST',
-      body: JSON.stringify({ walletUrl }),
-    });
-  }
-
-  async getTransactionStatus(transactionId: number): Promise<ApiResponse<any>> {
-    return this.request<any>(`/wallets/transaction/${transactionId}/status`);
   }
 
   // Utility methods

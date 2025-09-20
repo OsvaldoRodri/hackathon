@@ -2,7 +2,7 @@ import express from 'express';
 import usuariosRoutes from './usuarios.js';
 import domiciliosRoutes from './domicilios.js';
 import recibosRoutes from './recibos.js';
-import walletsRoutes from './wallets.js';
+import authRoutes from './auth.js';
 import { Recibo, Domicilio, Usuario } from '../models/index.js';
 
 const router = express.Router();
@@ -11,7 +11,7 @@ const router = express.Router();
 router.use('/usuarios', usuariosRoutes);
 router.use('/domicilios', domiciliosRoutes);
 router.use('/recibos', recibosRoutes);
-router.use('/wallets', walletsRoutes);
+router.use('/auth', authRoutes);
 
 // Compatibilidad: Mantener ruta /duenos redirigiendo a /usuarios/duenos
 router.use('/duenos', (req, res, next) => {
@@ -26,6 +26,11 @@ router.get('/', (_req, res) => {
     version: '1.0.0',
     timestamp: new Date().toISOString(),
     endpoints: {
+      auth: [
+        'POST /api/auth/login - Iniciar sesión',
+        'POST /api/auth/logout - Cerrar sesión',
+        'GET /api/auth/me - Información del usuario actual'
+      ],
       usuarios: [
         'GET /api/usuarios - Todos los usuarios',
         'GET /api/usuarios/duenos - Solo dueños',

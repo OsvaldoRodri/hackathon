@@ -1,61 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiService, Wallet } from '../services/api';
+import { apiService } from '../services/api';
 import './procespayments.css';
 
 const ProcesPayments: React.FC = () => {
   const navigate = useNavigate();
-  const [walletCode, setWalletCode] = useState('');
   const [amount, setAmount] = useState('');
   const [paymentConcept, setPaymentConcept] = useState('');
-  const [userWallet, setUserWallet] = useState<Wallet | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     // Verificar autenticación
     const token = localStorage.getItem('userToken');
-    const userId = localStorage.getItem('userId');
     if (!token) {
       navigate('/login');
       return;
     }
 
-    // Cargar wallet del usuario
-    if (userId) {
-      loadUserWallet(parseInt(userId));
-    }
-
     // Obtener parámetros de la URL
     const urlParams = new URLSearchParams(window.location.search);
-    const amountFromUrl = urlParams.get('amount');
-    const serviceFromUrl = urlParams.get('service');
+    const amountParam = urlParams.get('amount');
+    const conceptParam = urlParams.get('concept');
     
-    if (amountFromUrl) {
-      setAmount(amountFromUrl.replace('$', ''));
-    }
-    if (serviceFromUrl) {
-      setPaymentConcept(serviceFromUrl);
-    }
+    if (amountParam) setAmount(amountParam);
+    if (conceptParam) setPaymentConcept(conceptParam);
   }, [navigate]);
-
-  const loadUserWallet = async (userId: number) => {
-    try {
-      const walletResponse = await apiService.getUserWallet(userId);
-      if (walletResponse.success) {
-        setUserWallet(walletResponse.data);
-        setWalletCode(walletResponse.data.walletUrl);
-      }
-    } catch (error) {
-      console.error('Error loading wallet:', error);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
-    if (!walletCode || !amount || !paymentConcept) {
+    if (!amount || !paymentConcept) {
       setError('Todos los campos son obligatorios');
       return;
     }
@@ -81,133 +57,69 @@ const ProcesPayments: React.FC = () => {
   };
 
   return (
-    <div className="procespayments-container">
-      <div className="navbar">
-        <div className="navbar-brand">
-          <img src="/logo.png" alt="QuickPay" className="navbar-logo" />
-          <span>QuickPay</span>
-        </div>
-        <div className="navbar-actions">
-          <button 
-            className="btn-logout"
-            onClick={() => {
-              localStorage.removeItem('userToken');
-              localStorage.removeItem('userEmail');
-              navigate('/');
-            }}
-          >
-            Cerrar sesión
-          </button>
-        </div>
-      </div>
+    <div className="proces-payments-container">
+      <div className="payment-card">
+        <h2>🏦 Procesar Pago</h2>
+        
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
 
-      <div className="main-content">
-        <div className="payment-form-container">
-          <div className="form-header">
-            <h1>Procesar Pago</h1>
-            <p>Complete la información para procesar su pago</p>
+        <form onSubmit={handleSubmit} className="payment-form">
+          <div className="form-group">
+            <label htmlFor="amount">Monto a Pagar:</label>
+            <input
+              type="number"
+              id="amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              step="0.01"
+              min="0.01"
+              required
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="payment-form">
-            {error && <div className="error-message">{error}</div>}
-            
-            {userWallet && (
-              <div className="wallet-info-section">
-                <h3>Información de tu Wallet</h3>
-                <p><strong>Wallet URL:</strong> {userWallet.walletUrl}</p>
-                <p><strong>Balance disponible:</strong> ${parseFloat(userWallet.balance.toString()).toFixed(2)}</p>
-              </div>
-            )}
-            
-            <div className="form-group">
-              <label htmlFor="walletCode">Código de Billetera OpenPayments</label>
-              <input
-                type="text"
-                id="walletCode"
-                value={walletCode}
-                onChange={(e) => setWalletCode(e.target.value)}
-                placeholder="URL de tu wallet OpenPayments"
-                required
-                readOnly={!!userWallet}
-              />
-              {userWallet && (
-                <small className="helper-text">Este es tu wallet configurado de OpenPayments</small>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="amount">Monto a Pagar</label>
-              <div className="amount-input-container">
-                <span className="currency-symbol">$</span>
-                <input
-                  type="number"
-                  id="amount"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="paymentConcept">Concepto de Pago</label>
-              <textarea
-                id="paymentConcept"
-                value={paymentConcept}
-                onChange={(e) => setPaymentConcept(e.target.value)}
-                placeholder="Describa el concepto del pago"
-                rows={3}
-                required
-              />
-            </div>
-
-            <div className="form-actions">
-              <button 
-                type="button" 
-                className="btn-cancel"
-                onClick={handleCancel}
-                disabled={isProcessing}
-              >
-                Cancelar
-              </button>
-              <button 
-                type="submit" 
-                className="btn-submit"
-                disabled={isProcessing}
-              >
-                {isProcessing ? 'Procesando...' : 'Procesar Pago'}
-              </button>
-            </div>
-          </form>
-
-          <div className="payment-info">
-            <div className="info-card">
-              <h3>Información del Pago</h3>
-              <div className="info-item">
-                <span className="label">Monto:</span>
-                <span className="value">${amount || '0.00'}</span>
-              </div>
-              <div className="info-item">
-                <span className="label">Concepto:</span>
-                <span className="value">{paymentConcept || 'Sin especificar'}</span>
-              </div>
-              <div className="info-item">
-                <span className="label">Estado:</span>
-                <span className="value status-pending">Pendiente</span>
-              </div>
-            </div>
+          <div className="form-group">
+            <label htmlFor="concept">Concepto del Pago:</label>
+            <input
+              type="text"
+              id="concept"
+              value={paymentConcept}
+              onChange={(e) => setPaymentConcept(e.target.value)}
+              placeholder="Ej: Pago de luz - Enero 2024"
+              required
+            />
           </div>
-        </div>
-      </div>
 
-      <footer className="footer">
-        <div className="footer-content">
-          <p>&copy; 2024 QuickPay. Todos los derechos reservados.</p>
-        </div>
-      </footer>
+          <div className="form-actions">
+            <button 
+              type="button" 
+              onClick={handleCancel}
+              className="cancel-btn"
+              disabled={isProcessing}
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit"
+              className="process-btn"
+              disabled={isProcessing}
+            >
+              {isProcessing ? '⏳ Procesando...' : '💳 Procesar Pago'}
+            </button>
+          </div>
+        </form>
+
+        {isProcessing && (
+          <div className="processing-indicator">
+            <div className="spinner"></div>
+            <p>Procesando tu pago de forma segura...</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

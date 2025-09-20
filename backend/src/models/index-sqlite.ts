@@ -63,6 +63,7 @@ Domicilio.init({
   calle: { type: DataTypes.STRING, allowNull: false },
   numero: { type: DataTypes.STRING, allowNull: false },
   colonia: { type: DataTypes.STRING, allowNull: false },
+  codigoPostal: { type: DataTypes.STRING, allowNull: false },
   municipio: { type: DataTypes.STRING, allowNull: false },
   estado: { type: DataTypes.STRING, allowNull: false },
   tipo: { type: DataTypes.ENUM('apartamento', 'casa', 'local'), allowNull: false },
