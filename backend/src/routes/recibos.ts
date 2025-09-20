@@ -1,7 +1,11 @@
 import express from 'express';
 import { Recibo, Domicilio, Usuario } from '../models/index.js';
+import { WalletService } from '../services/walletService.js';
 
 const router = express.Router();
+
+// Instanciar el servicio de wallet
+const walletService = new WalletService();
 
 // GET /api/recibos - Obtener todos los recibos
 router.get('/', async (req, res) => {
@@ -115,10 +119,20 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/recibos/:id/pagar - Marcar recibo como pagado
+// PUT /api/recibos/:id/pagar - Marcar recibo como pagado usando OpenPayments
 router.put('/:id/pagar', async (req, res) => {
   try {
-    const recibo = await Recibo.findByPk(req.params.id);
+    const { userId, walletCode } = req.body;
+    
+    const recibo = await Recibo.findByPk(req.params.id, {
+      include: [{ 
+        model: Domicilio, 
+        include: [{ 
+          model: Usuario, 
+          as: 'propietario' 
+        }] 
+      }]
+    });
     
     if (!recibo) {
       return res.status(404).json({ 
@@ -133,22 +147,79 @@ router.put('/:id/pagar', async (req, res) => {
         error: 'El recibo ya está marcado como pagado'
       });
     }
-    
-    await recibo.update({
-      estado: 'pagado',
-      fechaPago: new Date()
+
+    // Validación básica de parámetros
+    if (!userId || !walletCode) {
+      return res.status(400).json({
+        success: false,
+        error: 'userId y walletCode son requeridos para procesar el pago'
+      });
+    }
+
+    // Obtener wallet del usuario pagador
+    const userWallet = await walletService.getUserWallet(parseInt(userId));
+    if (!userWallet) {
+      return res.status(400).json({
+        success: false,
+        error: 'Usuario no tiene una wallet configurada'
+      });
+    }
+
+    // Validar que el walletCode coincida con la wallet del usuario
+    if (userWallet.walletUrl !== walletCode) {
+      return res.status(400).json({
+        success: false,
+        error: 'El código de wallet no coincide con la wallet del usuario'
+      });
+    }
+
+    // Obtener wallet del tesorero
+    const treasurerWallet = await walletService.getTreasurerWallet();
+    if (!treasurerWallet) {
+      return res.status(500).json({
+        success: false,
+        error: 'No se encontró la wallet del tesorero. Contacte al administrador.'
+      });
+    }
+
+    // Procesar el pago usando OpenPayments
+    const paymentResult = await walletService.processPayment({
+      reciboId: parseInt(req.params.id),
+      senderUserId: parseInt(userId),
+      receiverUserId: treasurerWallet.userId,
+      amount: parseFloat(recibo.monto.toString()),
+      description: `Pago de ${recibo.concepto} - Recibo ${recibo.numero}`
     });
-    
-    return res.json({
-      success: true,
-      data: recibo,
-      message: 'Recibo marcado como pagado exitosamente'
-    });
+
+    if (paymentResult.success) {
+      // Marcar el recibo como pagado
+      await recibo.update({
+        estado: 'pagado',
+        fechaPago: new Date()
+      });
+
+      return res.json({
+        success: true,
+        data: recibo,
+        transaction: {
+          id: paymentResult.transactionId,
+          openPaymentsId: paymentResult.openPaymentsTransactionId
+        },
+        message: 'Pago procesado exitosamente usando OpenPayments'
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: paymentResult.error || 'Error al procesar el pago',
+        message: paymentResult.message
+      });
+    }
+
   } catch (error) {
-    console.error('Error al marcar recibo como pagado:', error);
+    console.error('Error al procesar pago:', error);
     return res.status(500).json({ 
       success: false, 
-      error: 'Error al marcar recibo como pagado' 
+      error: 'Error interno del servidor al procesar el pago' 
     });
   }
 });

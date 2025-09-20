@@ -1,11 +1,11 @@
-import { sequelize, Usuario, Domicilio, Recibo } from '../models/index.js';
+import { sequelize, Usuario, Domicilio, Recibo } from '../models/index-sqlite.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 const seedDatabase = async () => {
   try {
-    console.log('🌱 Iniciando seeding de la base de datos...');
+    console.log('🌱 Iniciando seeding de la base de datos (SQLite)...');
     
     // Conectar a la base de datos
     await sequelize.authenticate();
@@ -25,7 +25,7 @@ const seedDatabase = async () => {
         email: 'admin@condominio.com',
         password: 'admin123', // En producción esto debe ser hasheado
         telefono: '555-0001',
-        curp: 'ROGJ850315HDFRLN01',
+        curp: '10000001',
         rol: 'admin',
         activo: true
       },
@@ -35,7 +35,7 @@ const seedDatabase = async () => {
         email: 'maria.admin@condominio.com',
         password: 'admin123',
         telefono: '555-0002',
-        curp: 'GOMA900421MDFRNR02',
+        curp: '10000002',
         rol: 'admin',
         activo: true
       }
@@ -50,7 +50,7 @@ const seedDatabase = async () => {
         email: 'tesorero@condominio.com',
         password: 'tesorero123',
         telefono: '555-0101',
-        curp: 'MECA800512HDFRLS03',
+        curp: '20000001',
         rol: 'tesorero',
         activo: true
       },
@@ -60,7 +60,7 @@ const seedDatabase = async () => {
         email: 'ana.tesorero@condominio.com',
         password: 'tesorero123',
         telefono: '555-0102',
-        curp: 'VAAN750830MDFSZN04',
+        curp: '20000002',
         rol: 'tesorero',
         activo: true
       }
@@ -75,7 +75,7 @@ const seedDatabase = async () => {
         email: 'pedro.garcia@email.com',
         password: 'dueno123',
         telefono: '555-1001',
-        curp: 'GARP880215HDFRRD05',
+        curp: '12345678',
         rol: 'dueno'
       },
       {
@@ -84,7 +84,7 @@ const seedDatabase = async () => {
         email: 'ana.martinez@email.com',
         password: 'dueno123',
         telefono: '555-1002',
-        curp: 'MAAN920707MDFRRN06',
+        curp: '23456789',
         rol: 'dueno'
       },
       {
@@ -93,7 +93,7 @@ const seedDatabase = async () => {
         email: 'luis.rodriguez@email.com',
         password: 'dueno123',
         telefono: '555-1003',
-        curp: 'ROLU870918HDFRDL07',
+        curp: '34567890',
         rol: 'dueno'
       },
       {
@@ -102,7 +102,7 @@ const seedDatabase = async () => {
         email: 'carmen.lopez@email.com',
         password: 'dueno123',
         telefono: '555-1004',
-        curp: 'LOCR941203MDFRPM08',
+        curp: '45678901',
         rol: 'dueno'
       },
       {
@@ -111,7 +111,7 @@ const seedDatabase = async () => {
         email: 'miguel.hernandez@email.com',
         password: 'dueno123',
         telefono: '555-1005',
-        curp: 'HEMI860425HDFRRG09',
+        curp: '56789012',
         rol: 'dueno'
       }
     ]);
@@ -120,47 +120,37 @@ const seedDatabase = async () => {
     // Crear domicilios de ejemplo
     const domicilios = await Domicilio.bulkCreate([
       {
-        calle: 'Av. Principal',
         numero: '101',
-        colonia: 'Centro',
-        municipio: 'Ciudad México',
-        estado: 'CDMX',
+        bloque: 'A',
+        area: 85.5,
         tipo: 'apartamento',
         duenoId: duenos[0]!.id
       },
       {
-        calle: 'Av. Principal',
         numero: '102',
-        colonia: 'Centro',
-        municipio: 'Ciudad México',
-        estado: 'CDMX',
+        bloque: 'A',
+        area: 92.0,
         tipo: 'apartamento',
         duenoId: duenos[1]!.id
       },
       {
-        calle: 'Calle Reforma',
         numero: '201',
-        colonia: 'Polanco',
-        municipio: 'Ciudad México',
-        estado: 'CDMX',
+        bloque: 'B',
+        area: 110.5,
         tipo: 'apartamento',
         duenoId: duenos[2]!.id
       },
       {
-        calle: 'Av. Insurgentes',
         numero: '301',
-        colonia: 'Roma Norte',
-        municipio: 'Ciudad México',
-        estado: 'CDMX',
+        bloque: 'C',
+        area: 120.0,
         tipo: 'casa',
         duenoId: duenos[3]!.id
       },
       {
-        calle: 'Calle Comercial',
         numero: 'L1',
-        colonia: 'Centro',
-        municipio: 'Ciudad México',
-        estado: 'CDMX',
+        bloque: 'PB',
+        area: 45.0,
         tipo: 'local',
         duenoId: duenos[4]!.id
       }
@@ -169,13 +159,13 @@ const seedDatabase = async () => {
     
     // Crear recibos de ejemplo
     const recibos = [];
-    const conceptos = ['luz', 'agua']; // Ahora solo los conceptos permitidos por el enum
+    const conceptos = ['Cuota de administración', 'Fondo de reserva', 'Servicios comunes', 'Mantenimiento', 'Seguridad'];
     
     for (let i = 0; i < domicilios.length; i++) {
       const domicilio = domicilios[i]!;
       
-      // Crear 4 recibos por domicilio (2 de luz, 2 de agua)
-      for (let j = 1; j <= 4; j++) {
+      // Crear 3 recibos por domicilio
+      for (let j = 1; j <= 3; j++) {
         const fechaVencimiento = new Date();
         fechaVencimiento.setMonth(fechaVencimiento.getMonth() + j);
         
@@ -184,7 +174,7 @@ const seedDatabase = async () => {
         
         recibos.push({
           numero: `REC-${domicilio.id}-${j.toString().padStart(3, '0')}`,
-          concepto: conceptos[(j - 1) % conceptos.length]!, // Alternar entre luz y agua
+          concepto: conceptos[j % conceptos.length]!,
           monto: Math.floor(Math.random() * 100000) + 50000, // Entre 50,000 y 150,000
           fechaVencimiento,
           fechaPago,
@@ -207,6 +197,11 @@ const seedDatabase = async () => {
    - ${recibosCreados.length} Recibos
    
 👥 Total de usuarios: ${administradores.length + tesoreros.length + duenos.length}
+
+🔐 Credenciales de prueba:
+   - Admin: admin@condominio.com / admin123
+   - Tesorero: tesorero@condominio.com / tesorero123
+   - Dueño: pedro.garcia@email.com / dueno123
 `);
     
   } catch (error) {

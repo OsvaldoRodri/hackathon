@@ -144,7 +144,9 @@ router.get('/:id', async (req, res) => {
 
 // POST /api/usuarios - Crear nuevo usuario
 router.post('/', sanitizeInput, validateSchema('usuario'), asyncHandler(async (req: express.Request, res: express.Response) => {
-  const { nombre, apellido, email, password, telefono, cedula, rol } = req.body;
+  const { nombre, apellido, email, password, telefono, curp, rol } = req.body;
+  
+  console.log('Intentando crear usuario con datos:', { nombre, apellido, email, telefono, curp, rol });
   
   // Validar que el rol sea válido
   if (!['dueno', 'admin', 'tesorero'].includes(rol)) {
@@ -160,9 +162,11 @@ router.post('/', sanitizeInput, validateSchema('usuario'), asyncHandler(async (r
     email,
     password, // En producción esto debería ser hasheado
     telefono,
-    cedula,
+    curp,
     rol
   });
+  
+  console.log('Usuario creado exitosamente con ID:', nuevoUsuario.id);
   
   // Excluir password de la respuesta
   const usuarioResponse = nuevoUsuario.toJSON();

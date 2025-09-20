@@ -4,403 +4,414 @@ import '../styles/App.css';
 import '../styles/admin-management.css';
 import Header from '../components/header';
 import Footer from '../components/footer';
-
-interface Vivienda {
-  id: number;
-  direccion: string;
-  tipo: string;
-  propietario: string;
-  medidorLuz: string;
-  medidorAgua: string;
-  email: string;
-  telefono: string;
-  fechaRegistro: string;
-  estado: string;
-}
+import { apiService, Domicilio, Usuario } from '../services/api';
 
 function AdminViviendas(): React.JSX.Element {
   const navigate = useNavigate();
-  const [viviendas, setViviendas] = useState<Vivienda[]>([
-    {
-      id: 1,
-      direccion: 'Calle Principal #123',
-      tipo: 'Casa',
-      propietario: 'Juan Pérez',
-      medidorLuz: 'CFE-12345',
-      medidorAgua: 'AGUA-67890',
-      email: 'juan@email.com',
-      telefono: '555-1234',
-      fechaRegistro: '2024-01-15',
-      estado: 'Activa'
-    },
-    {
-      id: 2,
-      direccion: 'Avenida Central #456',
-      tipo: 'Departamento',
-      propietario: 'María González',
-      medidorLuz: 'CFE-54321',
-      medidorAgua: 'AGUA-09876',
-      email: 'maria@email.com',
-      telefono: '555-5678',
-      fechaRegistro: '2024-02-20',
-      estado: 'Activa'
-    },
-    {
-      id: 3,
-      direccion: 'Calle Secundaria #789',
-      tipo: 'Negocio',
-      propietario: 'Carlos Rodríguez',
-      medidorLuz: 'CFE-98765',
-      medidorAgua: 'Sin medidor',
-      email: 'carlos@email.com',
-      telefono: '555-9012',
-      fechaRegistro: '2024-03-10',
-      estado: 'Activa'
-    }
-  ]);
-
+  const [domicilios, setDomicilios] = useState<Domicilio[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [editingVivienda, setEditingVivienda] = useState<Vivienda | null>(null);
+  const [editingDomicilio, setEditingDomicilio] = useState<Domicilio | null>(null);
   const [formData, setFormData] = useState({
-    direccion: '',
-    tipo: 'Casa',
-    propietario: '',
-    medidorLuz: '',
-    medidorAgua: '',
-    email: '',
-    telefono: ''
+    calle: '',
+    numero: '',
+    colonia: '',
+    municipio: '',
+    estado: '',
+    tipo: 'apartamento' as 'apartamento' | 'casa' | 'local',
+    duenoId: 0
   });
 
   useEffect(() => {
-    // Verificar si el usuario está logueado y es administrador
+    // Verificar si el usuario está logueado y es administrador/tesorero
     const token = localStorage.getItem('userToken');
     const role = localStorage.getItem('userRole');
     
-    if (!token || role !== 'admin') {
+    if (!token || (role !== 'admin' && role !== 'tesorero')) {
       window.location.href = '/login';
       return;
     }
+
+    loadData();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userRole');
-    window.location.href = '/';
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Cargar domicilios y usuarios en paralelo
+      const [domiciliosResponse, usuariosResponse] = await Promise.all([
+        apiService.getDomicilios(),
+        apiService.getDuenos() // Solo obtener dueños para asignar propiedades
+      ]);
+
+      if (domiciliosResponse.success) {
+        setDomicilios(domiciliosResponse.data);
+      } else {
+        setError('Error al cargar domicilios');
+      }
+
+      if (usuariosResponse.success) {
+        setUsuarios(usuariosResponse.data);
+      } else {
+        setError('Error al cargar usuarios');
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setError('Error al cargar datos');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const openAddModal = () => {
-    setEditingVivienda(null);
-    setFormData({
-      direccion: '',
-      tipo: 'Casa',
-      propietario: '',
-      medidorLuz: '',
-      medidorAgua: '',
-      email: '',
-      telefono: ''
-    });
-    setShowModal(true);
-  };
-
-  const openEditModal = (vivienda: Vivienda) => {
-    setEditingVivienda(vivienda);
-    setFormData({
-      direccion: vivienda.direccion,
-      tipo: vivienda.tipo,
-      propietario: vivienda.propietario,
-      medidorLuz: vivienda.medidorLuz,
-      medidorAgua: vivienda.medidorAgua,
-      email: vivienda.email,
-      telefono: vivienda.telefono
-    });
+  const openModal = (domicilio?: Domicilio) => {
+    if (domicilio) {
+      setEditingDomicilio(domicilio);
+      setFormData({
+        calle: domicilio.calle,
+        numero: domicilio.numero,
+        colonia: domicilio.colonia,
+        municipio: domicilio.municipio,
+        estado: domicilio.estado,
+        tipo: domicilio.tipo,
+        duenoId: domicilio.duenoId
+      });
+    } else {
+      setEditingDomicilio(null);
+      setFormData({
+        calle: '',
+        numero: '',
+        colonia: '',
+        municipio: '',
+        estado: '',
+        tipo: 'apartamento',
+        duenoId: 0
+      });
+    }
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setEditingVivienda(null);
+    setEditingDomicilio(null);
+    setFormData({
+      calle: '',
+      numero: '',
+      colonia: '',
+      municipio: '',
+      estado: '',
+      tipo: 'apartamento',
+      duenoId: 0
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      if (editingDomicilio) {
+        // Actualizar domicilio existente
+        // Note: El backend no tiene endpoint de actualización de domicilios aún
+        setError('Función de actualización no implementada en el backend');
+      } else {
+        // Crear nuevo domicilio
+        const response = await apiService.createDomicilio(formData);
+        if (response.success) {
+          await loadData(); // Recargar la lista
+          closeModal();
+        } else {
+          setError('Error al crear domicilio');
+        }
+      }
+    } catch (error) {
+      console.error('Error saving domicilio:', error);
+      setError('Error al guardar domicilio');
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'duenoId' ? parseFloat(value) || 0 : value
+    }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (editingVivienda) {
-      // Editar vivienda existente
-      setViviendas(prev => prev.map(v => 
-        v.id === editingVivienda.id 
-          ? { ...v, ...formData }
-          : v
-      ));
-    } else {
-      // Agregar nueva vivienda
-      const newVivienda: Vivienda = {
-        id: Math.max(...viviendas.map(v => v.id)) + 1,
-        ...formData,
-        fechaRegistro: new Date().toISOString().split('T')[0],
-        estado: 'Activa'
-      };
-      setViviendas(prev => [...prev, newVivienda]);
-    }
-    
-    closeModal();
-  };
-
-  const handleDelete = (id: number) => {
-    if (confirm('¿Estás seguro de que quieres eliminar esta vivienda?')) {
-      setViviendas(prev => prev.filter(v => v.id !== id));
+  const getTipoDisplayName = (tipo: string) => {
+    switch (tipo) {
+      case 'apartamento': return 'Apartamento';
+      case 'casa': return 'Casa';
+      case 'local': return 'Local/Negocio';
+      default: return tipo;
     }
   };
 
-  const toggleEstado = (id: number) => {
-    setViviendas(prev => prev.map(v => 
-      v.id === id 
-        ? { ...v, estado: v.estado === 'Activa' ? 'Inactiva' : 'Activa' }
-        : v
-    ));
+  const getPropietarioName = (duenoId: number) => {
+    const propietario = usuarios.find(u => u.id === duenoId);
+    return propietario ? `${propietario.nombre} ${propietario.apellido}` : 'No asignado';
   };
+
+  const getPropietarioEmail = (duenoId: number) => {
+    const propietario = usuarios.find(u => u.id === duenoId);
+    return propietario ? propietario.email : '';
+  };
+
+  if (isLoading) {
+    return (
+      <>
+        <Header />
+        <main>
+          <div className="main-content">
+            <div style={{ textAlign: 'center', padding: '50px' }}>
+              <h2>Cargando viviendas...</h2>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
       <Header />
       <main>
         <div className="main-content">
-          <div className="admin-management-container">
-            
-            {/* Header */}
-            <div className="management-header">
-              <div className="header-info">
+          <div className="admin-container">
+            <div className="admin-header">
+              <h1>Gestión de Viviendas</h1>
+              <div className="admin-actions">
                 <button 
-                  onClick={() => navigate('/admin')} 
-                  className="back-button"
+                  className="btn-primary" 
+                  onClick={() => openModal()}
                 >
-                  ← Volver al Panel
+                  + Nueva Vivienda
                 </button>
-                <h1>Gestión de Viviendas</h1>
-                <p>Administra las viviendas registradas en el sistema</p>
-              </div>
-              <div className="header-actions">
-                <button onClick={openAddModal} className="add-button">
-                  + Agregar Vivienda
-                </button>
-                <button onClick={handleLogout} className="logout-button">
-                  Cerrar Sesión
+                <button 
+                  className="btn-secondary" 
+                  onClick={() => navigate('/admin')}
+                >
+                  Volver al Panel
                 </button>
               </div>
             </div>
 
+            {error && (
+              <div className="error-message" style={{ 
+                background: '#fee', 
+                color: '#c33', 
+                padding: '10px', 
+                borderRadius: '5px', 
+                margin: '10px 0',
+                border: '1px solid #fcc'
+              }}>
+                {error}
+              </div>
+            )}
+
             {/* Estadísticas */}
-            <div className="stats-summary">
-              <div className="summary-card">
-                <div className="summary-icon">🏠</div>
-                <div className="summary-info">
-                  <span className="summary-number">{viviendas.length}</span>
-                  <span className="summary-label">Total Viviendas</span>
-                </div>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <h3>Total Viviendas</h3>
+                <p className="stat-value">{domicilios.length}</p>
               </div>
-              <div className="summary-card">
-                <div className="summary-icon">✅</div>
-                <div className="summary-info">
-                  <span className="summary-number">{viviendas.filter(v => v.estado === 'Activa').length}</span>
-                  <span className="summary-label">Activas</span>
-                </div>
+              <div className="stat-card">
+                <h3>Apartamentos</h3>
+                <p className="stat-value">{domicilios.filter(d => d.tipo === 'apartamento').length}</p>
               </div>
-              <div className="summary-card">
-                <div className="summary-icon">❌</div>
-                <div className="summary-info">
-                  <span className="summary-number">{viviendas.filter(v => v.estado === 'Inactiva').length}</span>
-                  <span className="summary-label">Inactivas</span>
-                </div>
+              <div className="stat-card">
+                <h3>Casas</h3>
+                <p className="stat-value">{domicilios.filter(d => d.tipo === 'casa').length}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Locales</h3>
+                <p className="stat-value">{domicilios.filter(d => d.tipo === 'local').length}</p>
               </div>
             </div>
 
             {/* Tabla de viviendas */}
-            <div className="management-table-section">
-              <div className="table-header">
-                <h2>Lista de Viviendas ({viviendas.length})</h2>
-              </div>
-              
-              <div className="management-table">
-                <div className="table-header-row">
-                  <div className="header-cell">Dirección</div>
-                  <div className="header-cell">Tipo</div>
-                  <div className="header-cell">Propietario</div>
-                  <div className="header-cell">Medidor Luz</div>
-                  <div className="header-cell">Estado</div>
-                  <div className="header-cell">Acciones</div>
-                </div>
-                
-                {viviendas.map((vivienda) => (
-                  <div key={vivienda.id} className="table-data-row">
-                    <div className="data-cell">
-                      <div className="address-info">
-                        <span className="address">{vivienda.direccion}</span>
-                        <span className="contact-info">{vivienda.email}</span>
-                      </div>
-                    </div>
-                    <div className="data-cell">
-                      <span className={`type-badge ${vivienda.tipo.toLowerCase()}`}>
-                        {vivienda.tipo}
-                      </span>
-                    </div>
-                    <div className="data-cell">
-                      <div className="owner-info">
-                        <span className="owner-name">{vivienda.propietario}</span>
-                        <span className="owner-phone">{vivienda.telefono}</span>
-                      </div>
-                    </div>
-                    <div className="data-cell">
-                      <span className="meter-code">{vivienda.medidorLuz}</span>
-                    </div>
-                    <div className="data-cell">
-                      <button 
-                        className={`status-toggle ${vivienda.estado.toLowerCase()}`}
-                        onClick={() => toggleEstado(vivienda.id)}
-                      >
-                        {vivienda.estado}
-                      </button>
-                    </div>
-                    <div className="data-cell actions">
-                      <button 
-                        className="action-btn edit"
-                        onClick={() => openEditModal(vivienda)}
-                      >
-                        Editar
-                      </button>
-                      <button 
-                        className="action-btn delete"
-                        onClick={() => handleDelete(vivienda.id)}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                ))}
+            <div className="viviendas-section">
+              <div className="table-container">
+                <table className="viviendas-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Número</th>
+                      <th>Calle</th>
+                      <th>Colonia</th>
+                      <th>Municipio</th>
+                      <th>Estado</th>
+                      <th>Tipo</th>
+                      <th>Propietario</th>
+                      <th>Email</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {domicilios.map(domicilio => (
+                      <tr key={domicilio.id}>
+                        <td>{domicilio.id}</td>
+                        <td>{domicilio.numero}</td>
+                        <td>{domicilio.calle}</td>
+                        <td>{domicilio.colonia}</td>
+                        <td>{domicilio.municipio}</td>
+                        <td>{domicilio.estado}</td>
+                        <td>
+                          <span className={`type-badge type-${domicilio.tipo}`}>
+                            {getTipoDisplayName(domicilio.tipo)}
+                          </span>
+                        </td>
+                        <td>{getPropietarioName(domicilio.duenoId)}</td>
+                        <td>{getPropietarioEmail(domicilio.duenoId)}</td>
+                        <td className="actions-cell">
+                          <button 
+                            className="btn-edit"
+                            onClick={() => openModal(domicilio)}
+                            title="Editar vivienda"
+                          >
+                            ✏️
+                          </button>
+                          <button 
+                            className="btn-view"
+                            onClick={() => {
+                              // Implementar vista de recibos de la vivienda
+                              navigate(`/admin/viviendas/${domicilio.id}/recibos`);
+                            }}
+                            title="Ver recibos"
+                          >
+                            📄
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
 
+            {/* Modal para crear/editar vivienda */}
+            {showModal && (
+              <div className="modal-overlay">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h2>{editingDomicilio ? 'Editar Vivienda' : 'Nueva Vivienda'}</h2>
+                    <button className="modal-close" onClick={closeModal}>×</button>
+                  </div>
+                  
+                  <form onSubmit={handleSubmit} className="vivienda-form">
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="numero">Número*</label>
+                        <input
+                          type="text"
+                          id="numero"
+                          name="numero"
+                          value={formData.numero}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="calle">Calle*</label>
+                        <input
+                          type="text"
+                          id="calle"
+                          name="calle"
+                          value={formData.calle}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="colonia">Colonia*</label>
+                        <input
+                          type="text"
+                          id="colonia"
+                          name="colonia"
+                          value={formData.colonia}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="municipio">Municipio*</label>
+                        <input
+                          type="text"
+                          id="municipio"
+                          name="municipio"
+                          value={formData.municipio}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="estado">Estado*</label>
+                        <input
+                          type="text"
+                          id="estado"
+                          name="estado"
+                          value={formData.estado}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="tipo">Tipo de Vivienda*</label>
+                        <select
+                          id="tipo"
+                          name="tipo"
+                          value={formData.tipo}
+                          onChange={handleInputChange}
+                          required
+                        >
+                          <option value="apartamento">Apartamento</option>
+                          <option value="casa">Casa</option>
+                          <option value="local">Local/Negocio</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="duenoId">Propietario*</label>
+                      <select
+                        id="duenoId"
+                        name="duenoId"
+                        value={formData.duenoId || ''}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Selecciona un propietario</option>
+                        {usuarios.map(usuario => (
+                          <option key={usuario.id} value={usuario.id}>
+                            {usuario.nombre} {usuario.apellido} ({usuario.email})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="modal-actions">
+                      <button type="button" className="btn-secondary" onClick={closeModal}>
+                        Cancelar
+                      </button>
+                      <button type="submit" className="btn-primary">
+                        {editingDomicilio ? 'Actualizar' : 'Crear'} Vivienda
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
-
-      {/* Modal para agregar/editar vivienda */}
-      {showModal && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="form-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{editingVivienda ? 'Editar Vivienda' : 'Agregar Nueva Vivienda'}</h3>
-              <button className="close-btn" onClick={closeModal}>×</button>
-            </div>
-            
-            <form onSubmit={handleSubmit} className="modal-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Dirección*</label>
-                  <input
-                    type="text"
-                    name="direccion"
-                    value={formData.direccion}
-                    onChange={handleInputChange}
-                    placeholder="Calle, número, colonia"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Tipo de Vivienda*</label>
-                  <select
-                    name="tipo"
-                    value={formData.tipo}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="Casa">Casa</option>
-                    <option value="Departamento">Departamento</option>
-                    <option value="Negocio">Negocio</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nombre del Propietario*</label>
-                  <input
-                    type="text"
-                    name="propietario"
-                    value={formData.propietario}
-                    onChange={handleInputChange}
-                    placeholder="Nombre completo"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Email*</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="correo@ejemplo.com"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Teléfono*</label>
-                  <input
-                    type="tel"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleInputChange}
-                    placeholder="555-1234"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Medidor de Luz*</label>
-                  <input
-                    type="text"
-                    name="medidorLuz"
-                    value={formData.medidorLuz}
-                    onChange={handleInputChange}
-                    placeholder="CFE-12345"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Medidor de Agua</label>
-                  <input
-                    type="text"
-                    name="medidorAgua"
-                    value={formData.medidorAgua}
-                    onChange={handleInputChange}
-                    placeholder="AGUA-67890 o 'Sin medidor'"
-                  />
-                </div>
-              </div>
-              
-              <div className="modal-actions">
-                <button type="button" className="cancel-btn" onClick={closeModal}>
-                  Cancelar
-                </button>
-                <button type="submit" className="submit-btn">
-                  {editingVivienda ? 'Actualizar' : 'Agregar'} Vivienda
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       <Footer />
     </>
   );

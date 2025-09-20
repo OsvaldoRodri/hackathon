@@ -3,34 +3,37 @@ import { Request, Response, NextFunction } from 'express';
 // Esquemas de validación para diferentes entidades
 const schemas = {
   usuario: {
-    required: ['nombre', 'apellido', 'email', 'password', 'cedula', 'rol'],
-    optional: ['telefono', 'activo'],
+    required: ['nombre', 'email', 'password', 'rol'],
+    optional: ['apellido', 'telefono', 'curp', 'activo'],
     validations: {
       email: (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-      cedula: (value: string) => /^\d{8,12}$/.test(value.replace(/[.-]/g, '')),
-      telefono: (value: string) => !value || /^\d{10,15}$/.test(value.replace(/[-()\s]/g, '')),
-      password: (value: string) => value.length >= 6,
+      curp: (value: string) => !value || (value.length >= 8 && value.length <= 18), // CURP opcional y más flexible
+      telefono: (value: string) => !value || value.length >= 10, // Solo verificar longitud mínima
+      password: (value: string) => value.length >= 4, // Contraseña más flexible
       rol: (value: string) => ['dueno', 'admin', 'tesorero'].includes(value),
-      nombre: (value: string) => value.length >= 2 && value.length <= 50,
-      apellido: (value: string) => value.length >= 2 && value.length <= 50
+      nombre: (value: string) => value.length >= 1 && value.length <= 100, // Más flexible
+      apellido: (value: string) => !value || (value.length >= 1 && value.length <= 100) // Opcional y más flexible
     }
   },
   dueno: {
-    required: ['nombre', 'apellido', 'email', 'cedula'],
-    optional: ['telefono'],
+    required: ['nombre', 'email'],
+    optional: ['apellido', 'telefono', 'curp'],
     validations: {
       email: (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-      cedula: (value: string) => /^\d{8,12}$/.test(value.replace(/[.-]/g, '')),
-      telefono: (value: string) => !value || /^\d{10,15}$/.test(value.replace(/[-()\s]/g, ''))
+      curp: (value: string) => !value || (value.length >= 8 && value.length <= 18), // CURP opcional
+      telefono: (value: string) => !value || value.length >= 10 // Solo verificar longitud mínima
     }
   },
   domicilio: {
-    required: ['numero', 'tipo', 'duenoId'],
-    optional: ['bloque', 'area'],
+    required: ['calle', 'tipo', 'duenoId'],
+    optional: ['numero', 'colonia', 'municipio', 'estado'],
     validations: {
-      numero: (value: string) => value.length > 0,
-      tipo: (value: string) => ['apartamento', 'casa', 'local'].includes(value),
-      area: (value: number) => !value || value > 0,
+      calle: (value: string) => value.length > 0,
+      numero: (value: string) => !value || value.length > 0,
+      colonia: (value: string) => !value || value.length > 0,
+      municipio: (value: string) => !value || value.length > 0,
+      estado: (value: string) => !value || value.length > 0,
+      tipo: (value: string) => ['apartamento', 'casa', 'local', 'otro'].includes(value), // Agregado 'otro'
       duenoId: (value: number) => Number.isInteger(value) && value > 0
     }
   },
@@ -39,7 +42,7 @@ const schemas = {
     optional: ['fechaPago', 'estado'],
     validations: {
       numero: (value: string) => value.length > 0,
-      concepto: (value: string) => value.length > 0,
+      concepto: (value: string) => ['luz', 'agua'].includes(value),
       monto: (value: number) => Number(value) > 0,
       fechaVencimiento: (value: string) => !isNaN(Date.parse(value)),
       fechaPago: (value: string) => !value || !isNaN(Date.parse(value)),

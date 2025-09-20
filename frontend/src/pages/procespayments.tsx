@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiService, Wallet } from '../services/api';
 import './procespayments.css';
 
 const ProcesPayments: React.FC = () => {
@@ -7,15 +8,22 @@ const ProcesPayments: React.FC = () => {
   const [walletCode, setWalletCode] = useState('');
   const [amount, setAmount] = useState('');
   const [paymentConcept, setPaymentConcept] = useState('');
+  const [userWallet, setUserWallet] = useState<Wallet | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     // Verificar autenticación
     const token = localStorage.getItem('userToken');
+    const userId = localStorage.getItem('userId');
     if (!token) {
       navigate('/login');
       return;
+    }
+
+    // Cargar wallet del usuario
+    if (userId) {
+      loadUserWallet(parseInt(userId));
     }
 
     // Obtener parámetros de la URL
@@ -29,7 +37,19 @@ const ProcesPayments: React.FC = () => {
     if (serviceFromUrl) {
       setPaymentConcept(serviceFromUrl);
     }
-  }, []);
+  }, [navigate]);
+
+  const loadUserWallet = async (userId: number) => {
+    try {
+      const walletResponse = await apiService.getUserWallet(userId);
+      if (walletResponse.success) {
+        setUserWallet(walletResponse.data);
+        setWalletCode(walletResponse.data.walletUrl);
+      }
+    } catch (error) {
+      console.error('Error loading wallet:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,16 +111,28 @@ const ProcesPayments: React.FC = () => {
           <form onSubmit={handleSubmit} className="payment-form">
             {error && <div className="error-message">{error}</div>}
             
+            {userWallet && (
+              <div className="wallet-info-section">
+                <h3>Información de tu Wallet</h3>
+                <p><strong>Wallet URL:</strong> {userWallet.walletUrl}</p>
+                <p><strong>Balance disponible:</strong> ${parseFloat(userWallet.balance.toString()).toFixed(2)}</p>
+              </div>
+            )}
+            
             <div className="form-group">
-              <label htmlFor="walletCode">Código de Billetera</label>
+              <label htmlFor="walletCode">Código de Billetera OpenPayments</label>
               <input
                 type="text"
                 id="walletCode"
                 value={walletCode}
                 onChange={(e) => setWalletCode(e.target.value)}
-                placeholder="Ingrese el código de su billetera"
+                placeholder="URL de tu wallet OpenPayments"
                 required
+                readOnly={!!userWallet}
               />
+              {userWallet && (
+                <small className="helper-text">Este es tu wallet configurado de OpenPayments</small>
+              )}
             </div>
 
             <div className="form-group">

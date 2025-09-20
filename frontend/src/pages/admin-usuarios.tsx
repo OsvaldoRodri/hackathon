@@ -1,33 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/admin-management.css';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  role: 'usuario' | 'admin' | 'tesorero';
-  address: string;
-  registeredAt: string;
-  lastLogin: string;
-  status: 'activo' | 'inactivo';
-  paymentStatus: 'al_dia' | 'pendiente' | 'atrasado';
-}
+import { apiService, Usuario } from '../services/api';
 
 const AdminUsuarios: React.FC = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<Usuario[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState<Partial<User>>({
-    name: '',
+  const [editingUser, setEditingUser] = useState<Usuario | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [formData, setFormData] = useState<Partial<Usuario>>({
+    nombre: '',
+    apellido: '',
     email: '',
-    phone: '',
-    role: 'usuario',
-    address: '',
-    status: 'activo',
-    paymentStatus: 'al_dia'
+    telefono: '',
+    curp: '',
+    rol: 'dueno',
+    activo: true
   });
 
   // Verificar autenticación de admin
@@ -39,89 +29,49 @@ const AdminUsuarios: React.FC = () => {
       navigate('/login');
       return;
     }
+    
+    loadUsers();
   }, [navigate]);
 
-  // Cargar datos de usuarios iniciales
-  useEffect(() => {
-    const mockUsers: User[] = [
-      {
-        id: 1,
-        name: 'María González',
-        email: 'maria.gonzalez@email.com',
-        phone: '555-0101',
-        role: 'usuario',
-        address: 'Calle Principal 123, Colonia Centro',
-        registeredAt: '2024-01-15',
-        lastLogin: '2024-01-20',
-        status: 'activo',
-        paymentStatus: 'al_dia'
-      },
-      {
-        id: 2,
-        name: 'Carlos Rodríguez',
-        email: 'carlos.rodriguez@email.com',
-        phone: '555-0102',
-        role: 'usuario',
-        address: 'Avenida Secundaria 456, Colonia Norte',
-        registeredAt: '2024-01-10',
-        lastLogin: '2024-01-18',
-        status: 'activo',
-        paymentStatus: 'pendiente'
-      },
-      {
-        id: 3,
-        name: 'Ana Martínez',
-        email: 'ana.martinez@email.com',
-        phone: '555-0103',
-        role: 'usuario',
-        address: 'Boulevard Oeste 789, Colonia Sur',
-        registeredAt: '2024-01-08',
-        lastLogin: '2024-01-15',
-        status: 'activo',
-        paymentStatus: 'atrasado'
-      },
-      {
-        id: 4,
-        name: 'Luis Herrera',
-        email: 'luis.herrera@email.com',
-        phone: '555-0104',
-        role: 'usuario',
-        address: 'Calle Lateral 321, Colonia Este',
-        registeredAt: '2024-01-05',
-        lastLogin: '2024-01-12',
-        status: 'inactivo',
-        paymentStatus: 'atrasado'
-      },
-      {
-        id: 5,
-        name: 'Sofia Jiménez',
-        email: 'sofia.jimenez@email.com',
-        phone: '555-0105',
-        role: 'tesorero',
-        address: 'Plaza Central 654, Colonia Administrativa',
-        registeredAt: '2024-01-01',
-        lastLogin: '2024-01-20',
-        status: 'activo',
-        paymentStatus: 'al_dia'
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await apiService.getUsuarios();
+      if (response.success) {
+        setUsers(response.data);
+      } else {
+        setError('Error al cargar usuarios');
       }
-    ];
-    setUsers(mockUsers);
-  }, []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      setError('Error al cargar usuarios');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const openModal = (user?: User) => {
+  const openModal = (user?: Usuario) => {
     if (user) {
       setEditingUser(user);
-      setFormData(user);
+      setFormData({
+        nombre: user.nombre,
+        apellido: user.apellido,
+        email: user.email,
+        telefono: user.telefono,
+        curp: user.curp,
+        rol: user.rol,
+        activo: user.activo
+      });
     } else {
       setEditingUser(null);
       setFormData({
-        name: '',
+        nombre: '',
+        apellido: '',
         email: '',
-        phone: '',
-        role: 'usuario',
-        address: '',
-        status: 'activo',
-        paymentStatus: 'al_dia'
+        telefono: '',
+        curp: '',
+        rol: 'dueno',
+        activo: true
       });
     }
     setIsModalOpen(true);
@@ -131,300 +81,340 @@ const AdminUsuarios: React.FC = () => {
     setIsModalOpen(false);
     setEditingUser(null);
     setFormData({
-      name: '',
+      nombre: '',
+      apellido: '',
       email: '',
-      phone: '',
-      role: 'usuario',
-      address: '',
-      status: 'activo',
-      paymentStatus: 'al_dia'
+      telefono: '',
+      curp: '',
+      rol: 'dueno',
+      activo: true
     });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (editingUser) {
-      // Editar usuario existente
-      setUsers(prev => prev.map(user => 
-        user.id === editingUser.id 
-          ? { ...user, ...formData } as User
-          : user
-      ));
-    } else {
-      // Agregar nuevo usuario
-      const newUser: User = {
-        id: Date.now(),
-        name: formData.name || '',
-        email: formData.email || '',
-        phone: formData.phone || '',
-        role: formData.role || 'usuario',
-        address: formData.address || '',
-        registeredAt: new Date().toISOString().split('T')[0],
-        lastLogin: 'Nunca',
-        status: formData.status || 'activo',
-        paymentStatus: formData.paymentStatus || 'al_dia'
-      };
-      setUsers(prev => [...prev, newUser]);
-    }
-    
-    closeModal();
-  };
-
-  const handleDelete = (userId: number) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-      setUsers(prev => prev.filter(user => user.id !== userId));
+    try {
+      if (editingUser) {
+        // Actualizar usuario existente
+        const response = await apiService.updateUsuario(editingUser.id, formData);
+        if (response.success) {
+          await loadUsers(); // Recargar la lista
+          closeModal();
+        } else {
+          setError('Error al actualizar usuario');
+        }
+      } else {
+        // Crear nuevo usuario
+        const response = await apiService.createUsuario({
+          ...formData,
+          password: 'temp123' // Password temporal que el usuario debe cambiar
+        } as Partial<Usuario>);
+        if (response.success) {
+          await loadUsers(); // Recargar la lista
+          closeModal();
+        } else {
+          setError('Error al crear usuario');
+        }
+      }
+    } catch (error) {
+      console.error('Error saving user:', error);
+      setError('Error al guardar usuario');
     }
   };
 
-  const toggleUserStatus = (userId: number) => {
-    setUsers(prev => prev.map(user => 
-      user.id === userId 
-        ? { ...user, status: user.status === 'activo' ? 'inactivo' : 'activo' } as User
-        : user
-    ));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }));
   };
 
-  const getStats = () => {
-    const totalUsers = users.length;
-    const activeUsers = users.filter(u => u.status === 'activo').length;
-    const admins = users.filter(u => u.role === 'admin' || u.role === 'tesorero').length;
-    const pendingPayments = users.filter(u => u.paymentStatus === 'pendiente' || u.paymentStatus === 'atrasado').length;
-    
-    return { totalUsers, activeUsers, admins, pendingPayments };
+  const toggleUserStatus = async (userId: number) => {
+    try {
+      const response = await apiService.toggleUsuarioStatus(userId);
+      if (response.success) {
+        await loadUsers(); // Recargar la lista
+      } else {
+        setError('Error al cambiar estado del usuario');
+      }
+    } catch (error) {
+      console.error('Error toggling user status:', error);
+      setError('Error al cambiar estado del usuario');
+    }
   };
 
-  const stats = getStats();
+  const deleteUser = async (userId: number) => {
+    if (window.confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+      try {
+        const response = await apiService.deleteUsuario(userId);
+        if (response.success) {
+          await loadUsers(); // Recargar la lista
+        } else {
+          setError('Error al eliminar usuario');
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        setError('Error al eliminar usuario');
+      }
+    }
+  };
+
+  const getActiveUsers = () => users.filter(u => u.activo).length;
+  const getInactiveUsers = () => users.filter(u => !u.activo).length;
+  const getUsersByRole = (role: string) => users.filter(u => u.rol === role).length;
+
+  const getRoleDisplayName = (rol: string) => {
+    switch (rol) {
+      case 'dueno': return 'Dueño';
+      case 'admin': return 'Administrador';
+      case 'tesorero': return 'Tesorero';
+      default: return rol;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="admin-container">
+        <div style={{ textAlign: 'center', padding: '50px' }}>
+          <h2>Cargando usuarios...</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="admin-management-container">
-      <div className="management-header">
-        <div className="header-info">
-          <button className="back-button" onClick={() => navigate('/admin')}>
-            ← Volver al Panel
-          </button>
-          <h1>Gestión de Usuarios</h1>
-          <p>Administra los usuarios registrados en el sistema</p>
-        </div>
-        <div className="header-actions">
-          <button className="add-button" onClick={() => openModal()}>
+    <div className="admin-container">
+      <div className="admin-header">
+        <h1>Gestión de Usuarios</h1>
+        <div className="admin-actions">
+          <button 
+            className="btn-primary" 
+            onClick={() => openModal()}
+          >
             + Nuevo Usuario
           </button>
+          <button 
+            className="btn-secondary" 
+            onClick={() => navigate('/admin')}
+          >
+            Volver al Panel
+          </button>
         </div>
       </div>
 
-      <div className="stats-summary">
-        <div className="summary-card">
-          <div className="summary-icon">👥</div>
-          <div className="summary-info">
-            <div className="summary-number">{stats.totalUsers}</div>
-            <div className="summary-label">Total Usuarios</div>
-          </div>
+      {error && (
+        <div className="error-message" style={{ 
+          background: '#fee', 
+          color: '#c33', 
+          padding: '10px', 
+          borderRadius: '5px', 
+          margin: '10px 0',
+          border: '1px solid #fcc'
+        }}>
+          {error}
         </div>
-        <div className="summary-card">
-          <div className="summary-icon">✅</div>
-          <div className="summary-info">
-            <div className="summary-number">{stats.activeUsers}</div>
-            <div className="summary-label">Usuarios Activos</div>
-          </div>
+      )}
+
+      {/* Estadísticas */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <h3>Total Usuarios</h3>
+          <p className="stat-value">{users.length}</p>
         </div>
-        <div className="summary-card">
-          <div className="summary-icon">🔧</div>
-          <div className="summary-info">
-            <div className="summary-number">{stats.admins}</div>
-            <div className="summary-label">Administradores</div>
-          </div>
+        <div className="stat-card">
+          <h3>Usuarios Activos</h3>
+          <p className="stat-value">{getActiveUsers()}</p>
         </div>
-        <div className="summary-card">
-          <div className="summary-icon">⚠️</div>
-          <div className="summary-info">
-            <div className="summary-number">{stats.pendingPayments}</div>
-            <div className="summary-label">Pagos Pendientes</div>
-          </div>
+        <div className="stat-card">
+          <h3>Usuarios Inactivos</h3>
+          <p className="stat-value">{getInactiveUsers()}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Dueños</h3>
+          <p className="stat-value">{getUsersByRole('dueno')}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Administradores</h3>
+          <p className="stat-value">{getUsersByRole('admin')}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Tesoreros</h3>
+          <p className="stat-value">{getUsersByRole('tesorero')}</p>
         </div>
       </div>
 
-      <div className="management-table-section">
-        <div className="table-header">
-          <h2>Lista de Usuarios</h2>
-        </div>
-        
-        <div className="management-table">
-          <div className="table-header-row">
-            <div className="header-cell">Usuario</div>
-            <div className="header-cell">Rol</div>
-            <div className="header-cell">Contacto</div>
-            <div className="header-cell">Estado</div>
-            <div className="header-cell">Pagos</div>
-            <div className="header-cell">Acciones</div>
-          </div>
-
-          {users.map(user => (
-            <div key={user.id} className="table-data-row">
-              <div className="data-cell">
-                <div className="owner-info">
-                  <div className="owner-name">{user.name}</div>
-                  <div className="contact-info">{user.address}</div>
-                  <div className="contact-info">
-                    Registro: {new Date(user.registeredAt).toLocaleDateString('es-ES')}
-                  </div>
-                </div>
-              </div>
-              <div className="data-cell">
-                <span className={`type-badge ${user.role}`}>
-                  {user.role === 'usuario' ? 'Usuario' : 
-                   user.role === 'admin' ? 'Administrador' : 'Tesorero'}
-                </span>
-              </div>
-              <div className="data-cell">
-                <div className="owner-info">
-                  <div className="owner-name">{user.email}</div>
-                  <div className="owner-phone">{user.phone}</div>
-                  <div className="contact-info">
-                    Último acceso: {user.lastLogin === 'Nunca' ? 'Nunca' : 
-                      new Date(user.lastLogin).toLocaleDateString('es-ES')}
-                  </div>
-                </div>
-              </div>
-              <div className="data-cell">
-                <button 
-                  className={`status-toggle ${user.status}`}
-                  onClick={() => toggleUserStatus(user.id)}
-                >
-                  {user.status}
-                </button>
-              </div>
-              <div className="data-cell">
-                <span className={`type-badge ${user.paymentStatus === 'al_dia' ? 'casa' : 
-                  user.paymentStatus === 'pendiente' ? 'departamento' : 'negocio'}`}>
-                  {user.paymentStatus === 'al_dia' ? 'Al Día' : 
-                   user.paymentStatus === 'pendiente' ? 'Pendiente' : 'Atrasado'}
-                </span>
-              </div>
-              <div className="data-cell actions">
-                <button 
-                  className="action-btn edit"
-                  onClick={() => openModal(user)}
-                >
-                  Editar
-                </button>
-                <button 
-                  className="action-btn delete"
-                  onClick={() => handleDelete(user.id)}
-                >
-                  Eliminar
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Tabla de usuarios */}
+      <div className="table-container">
+        <table className="users-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>CURP</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Fecha Registro</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(user => (
+              <tr key={user.id}>
+                <td>{user.id}</td>
+                <td>{`${user.nombre} ${user.apellido}`}</td>
+                <td>{user.email}</td>
+                <td>{user.telefono}</td>
+                <td>{user.curp}</td>
+                <td>
+                  <span className={`role-badge role-${user.rol}`}>
+                    {getRoleDisplayName(user.rol)}
+                  </span>
+                </td>
+                <td>
+                  <span className={`status-badge ${user.activo ? 'status-active' : 'status-inactive'}`}>
+                    {user.activo ? 'Activo' : 'Inactivo'}
+                  </span>
+                </td>
+                <td>{new Date(user.fechaRegistro).toLocaleDateString()}</td>
+                <td className="actions-cell">
+                  <button 
+                    className="btn-edit"
+                    onClick={() => openModal(user)}
+                    title="Editar usuario"
+                  >
+                    ✏️
+                  </button>
+                  <button 
+                    className={`btn-toggle ${user.activo ? 'btn-deactivate' : 'btn-activate'}`}
+                    onClick={() => toggleUserStatus(user.id)}
+                    title={user.activo ? 'Desactivar usuario' : 'Activar usuario'}
+                  >
+                    {user.activo ? '🔒' : '🔓'}
+                  </button>
+                  <button 
+                    className="btn-delete"
+                    onClick={() => deleteUser(user.id)}
+                    title="Eliminar usuario"
+                  >
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
+      {/* Modal para crear/editar usuario */}
       {isModalOpen && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="form-modal" onClick={(e) => e.stopPropagation()}>
-            <form onSubmit={handleSubmit} className="modal-form">
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
               <h2>{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}</h2>
-              
+              <button className="modal-close" onClick={closeModal}>×</button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="user-form">
               <div className="form-row">
                 <div className="form-group">
-                  <label>Nombre Completo</label>
+                  <label htmlFor="nombre">Nombre*</label>
                   <input
                     type="text"
-                    name="name"
-                    value={formData.name || ''}
+                    id="nombre"
+                    name="nombre"
+                    value={formData.nombre || ''}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
                 <div className="form-group">
-                  <label>Email</label>
+                  <label htmlFor="apellido">Apellido*</label>
                   <input
-                    type="email"
-                    name="email"
-                    value={formData.email || ''}
+                    type="text"
+                    id="apellido"
+                    name="apellido"
+                    value={formData.apellido || ''}
                     onChange={handleInputChange}
                     required
                   />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Teléfono</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone || ''}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Rol</label>
-                  <select
-                    name="role"
-                    value={formData.role || 'usuario'}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="usuario">Usuario</option>
-                    <option value="admin">Administrador</option>
-                    <option value="tesorero">Tesorero</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Estado</label>
-                  <select
-                    name="status"
-                    value={formData.status || 'activo'}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="activo">Activo</option>
-                    <option value="inactivo">Inactivo</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Estado de Pagos</label>
-                  <select
-                    name="paymentStatus"
-                    value={formData.paymentStatus || 'al_dia'}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="al_dia">Al Día</option>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="atrasado">Atrasado</option>
-                  </select>
                 </div>
               </div>
 
               <div className="form-group">
-                <label>Dirección Completa</label>
+                <label htmlFor="email">Email*</label>
                 <input
-                  type="text"
-                  name="address"
-                  value={formData.address || ''}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email || ''}
                   onChange={handleInputChange}
                   required
                 />
               </div>
 
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="telefono">Teléfono*</label>
+                  <input
+                    type="tel"
+                    id="telefono"
+                    name="telefono"
+                    value={formData.telefono || ''}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="curp">CURP*</label>
+                  <input
+                    type="text"
+                    id="curp"
+                    name="curp"
+                    value={formData.curp || ''}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="rol">Rol*</label>
+                  <select
+                    id="rol"
+                    name="rol"
+                    value={formData.rol || 'dueno'}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="dueno">Dueño</option>
+                    <option value="admin">Administrador</option>
+                    <option value="tesorero">Tesorero</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="activo"
+                      checked={formData.activo || false}
+                      onChange={handleInputChange}
+                    />
+                    Usuario Activo
+                  </label>
+                </div>
+              </div>
+
               <div className="modal-actions">
-                <button type="button" className="cancel-btn" onClick={closeModal}>
+                <button type="button" className="btn-secondary" onClick={closeModal}>
                   Cancelar
                 </button>
-                <button type="submit" className="submit-btn">
-                  {editingUser ? 'Guardar Cambios' : 'Crear Usuario'}
+                <button type="submit" className="btn-primary">
+                  {editingUser ? 'Actualizar' : 'Crear'} Usuario
                 </button>
               </div>
             </form>

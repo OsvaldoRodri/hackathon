@@ -3,6 +3,7 @@ import '../styles/App.css';
 import '../styles/login.css';
 import Header from '../components/header';
 import Footer from '../components/footer';
+import { apiService } from '../services/api';
 
 function Login(): React.JSX.Element {
   const [formData, setFormData] = useState({
@@ -25,45 +26,37 @@ function Login(): React.JSX.Element {
     setIsLoading(true);
     setError('');
 
-    // Simulamos la autenticación
-    setTimeout(() => {
-      if (formData.email && formData.password) {
-        // Definir credenciales de administrador y tesorero
-        const adminCredentials = {
-          email: 'admin@quickpay.com',
-          password: 'admin123'
-        };
-        
-        const treasurerCredentials = {
-          email: 'tesorero@quickpay.com',
-          password: 'tesorero123'
-        };
-
-        // Verificar tipo de usuario y redirigir según corresponda
-        if (formData.email === adminCredentials.email && formData.password === adminCredentials.password) {
-          // Usuario administrador
-          localStorage.setItem('userToken', 'admin-token-456');
-          localStorage.setItem('userEmail', formData.email);
-          localStorage.setItem('userRole', 'admin');
-          window.location.href = "/admin";
-        } else if (formData.email === treasurerCredentials.email && formData.password === treasurerCredentials.password) {
-          // Usuario tesorero
-          localStorage.setItem('userToken', 'treasurer-token-789');
-          localStorage.setItem('userEmail', formData.email);
-          localStorage.setItem('userRole', 'treasurer');
-          window.location.href = "/treasurer";
-        } else {
-          // Usuario normal
-          localStorage.setItem('userToken', 'demo-token-123');
-          localStorage.setItem('userEmail', formData.email);
-          localStorage.setItem('userRole', 'user');
-          window.location.href = "/payments";
-        }
-      } else {
+    try {
+      if (!formData.email || !formData.password) {
         setError('Por favor completa todos los campos');
         setIsLoading(false);
+        return;
       }
-    }, 1500);
+
+      const response = await apiService.login(formData);
+      
+      if (response.success) {
+        const { user } = response.data;
+        
+        // Redirigir según el rol del usuario
+        switch (user.rol) {
+          case 'admin':
+            window.location.href = "/admin";
+            break;
+          case 'tesorero':
+            window.location.href = "/treasurer";
+            break;
+          case 'dueno':
+          default:
+            window.location.href = "/payments";
+            break;
+        }
+      }
+    } catch (error) {
+      console.error('Error en login:', error);
+      setError('Credenciales inválidas o error del servidor');
+      setIsLoading(false);
+    }
   };
 
   return (

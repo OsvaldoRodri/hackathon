@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import './styles/App.css';
 import Header from './components/header';
 import Footer from './components/footer';
+import { apiService } from './services/api';
 
 function App(): React.JSX.Element {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Verificar si el usuario está logueado (simulamos con localStorage)
+  // Verificar si el usuario está logueado
   useEffect(() => {
-    const userToken = localStorage.getItem('userToken');
-    setIsLoggedIn(!!userToken);
+    setIsLoggedIn(apiService.isAuthenticated());
   }, []);
 
   // Función para manejar el clic en "Ver mis pagos"

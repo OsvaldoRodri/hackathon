@@ -69,15 +69,31 @@ router.get('/:id', async (req, res) => {
 // POST /api/domicilios - Crear nuevo domicilio
 router.post('/', async (req, res) => {
   try {
-    const { numero, bloque, area, tipo, duenoId } = req.body;
+    const { calle, numero, colonia, municipio, estado, tipo, duenoId } = req.body;
+    
+    console.log('Intentando crear domicilio para duenoId:', duenoId);
+    console.log('Datos del domicilio:', { calle, numero, colonia, municipio, estado, tipo });
 
     // Verificar que el usuario existe y es un dueño
-    const usuario = await Usuario.findByPk(duenoId);
+    // Agregar un pequeño delay para permitir que la transacción del usuario se complete
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    let usuario = await Usuario.findByPk(duenoId);
+    console.log('Usuario encontrado:', usuario ? `ID: ${usuario.id}, rol: ${usuario.rol}` : 'NO ENCONTRADO');
+    
+    // Si no encuentra el usuario, intentar una vez más con un delay mayor
     if (!usuario) {
-      return res.status(400).json({
-        success: false,
-        error: 'El usuario especificado no existe'
-      });
+      console.log('Usuario no encontrado, intentando nuevamente después de delay...');
+      await new Promise(resolve => setTimeout(resolve, 500));
+      usuario = await Usuario.findByPk(duenoId);
+      console.log('Segundo intento - Usuario encontrado:', usuario ? `ID: ${usuario.id}, rol: ${usuario.rol}` : 'NO ENCONTRADO');
+      
+      if (!usuario) {
+        return res.status(400).json({
+          success: false,
+          error: 'El usuario especificado no existe'
+        });
+      }
     }
     
     if (usuario.rol !== 'dueno') {
@@ -88,9 +104,11 @@ router.post('/', async (req, res) => {
     }
     
     const nuevoDomicilio = await Domicilio.create({
+      calle,
       numero,
-      bloque,
-      area,
+      colonia,
+      municipio,
+      estado,
       tipo,
       duenoId
     });

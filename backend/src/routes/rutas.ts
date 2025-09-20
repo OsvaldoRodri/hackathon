@@ -2,6 +2,7 @@ import express from 'express';
 import usuariosRoutes from './usuarios.js';
 import domiciliosRoutes from './domicilios.js';
 import recibosRoutes from './recibos.js';
+import walletsRoutes from './wallets.js';
 import { Recibo, Domicilio, Usuario } from '../models/index.js';
 
 const router = express.Router();
@@ -10,6 +11,7 @@ const router = express.Router();
 router.use('/usuarios', usuariosRoutes);
 router.use('/domicilios', domiciliosRoutes);
 router.use('/recibos', recibosRoutes);
+router.use('/wallets', walletsRoutes);
 
 // Compatibilidad: Mantener ruta /duenos redirigiendo a /usuarios/duenos
 router.use('/duenos', (req, res, next) => {
@@ -49,7 +51,15 @@ router.get('/', (_req, res) => {
         'GET /api/recibos',
         'GET /api/recibos/pendientes',
         'POST /api/recibos',
-        'PUT /api/recibos/:id/pagar'
+        'PUT /api/recibos/:id/pagar (con OpenPayments)'
+      ],
+      wallets: [
+        'GET /api/wallets/user/:userId - Wallet del usuario',
+        'POST /api/wallets - Crear wallet',
+        'GET /api/wallets/treasurer - Wallet del tesorero',
+        'GET /api/wallets/:walletId/transactions - Historial de transacciones',
+        'POST /api/wallets/validate - Validar wallet URL',
+        'GET /api/wallets/transaction/:transactionId/status - Estado de transacción'
       ],
       reportes: [
         'GET /api/reportes/ingresos',
@@ -67,7 +77,7 @@ router.get('/reportes/ingresos', async (_req, res) => {
       attributes: ['monto', 'fechaPago', 'concepto', 'numero'],
       include: [{ 
         model: Domicilio, 
-        attributes: ['numero', 'bloque'],
+        attributes: ['numero', 'calle', 'colonia'],
         include: [{ 
           model: Usuario, 
           as: 'propietario',
