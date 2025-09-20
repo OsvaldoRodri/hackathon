@@ -115,6 +115,38 @@
   margin-bottom: 1.2rem;
 }
 
+/* Agrupadores para campos relacionados */
+.name-fields-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.name-fields-group .form-group {
+  margin-bottom: 0;
+}
+
+.address-fields-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.address-fields-group .form-group {
+  margin-bottom: 0;
+}
+
+.address-fields-group .form-group:nth-child(1),
+.address-fields-group .form-group:nth-child(2) {
+  grid-column: span 1;
+}
+
+.address-fields-group .form-group:nth-child(3) {
+  grid-column: span 2;
+}
+
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;

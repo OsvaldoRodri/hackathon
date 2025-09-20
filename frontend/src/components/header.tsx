@@ -84,7 +84,7 @@ function Header(){
                     <div className="userText">
                         {isLoggedIn ? (
                             <div className="loggedInUser">
-                                <span className="userName">{userEmail}</span>
+                                <span className="Name">{userEmail}</span>
                             </div>
                         ) : (
                             <div className="notLoggedUser">

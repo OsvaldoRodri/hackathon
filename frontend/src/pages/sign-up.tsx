@@ -15,14 +15,38 @@ function SignUp(): React.JSX.Element {
               <div className="signup-container">
                 <div className="signup-form">
                   <h1>Crear Nueva Cuenta*</h1>
+                
+                <div className="name-fields-group">
+                  <div className="form-group">
+                    <label htmlFor="nombre">Nombre*</label>
+                    <input 
+                      type="text" 
+                      id="nombre" 
+                      name="nombre" 
+                      placeholder="Ingresa tu nombre"
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="apellidoPaterno">Apellido Paterno*</label>
+                    <input 
+                      type="text" 
+                      id="apellidoPaterno" 
+                      name="apellidoPaterno" 
+                      placeholder="Ingresa tu apellido paterno"
+                      required 
+                    />
+                  </div>
+                </div>
+                
                 <div className="form-group">
-                  <label htmlFor="nombre">Nombre Completo*</label>
+                  <label htmlFor="apellidoMaterno">Apellido Materno</label>
                   <input 
                     type="text" 
-                    id="nombre" 
-                    name="nombre" 
-                    placeholder="Ingresa tu nombre completo"
-                    required 
+                    id="apellidoMaterno" 
+                    name="apellidoMaterno" 
+                    placeholder="Ingresa tu apellido materno"
                   />
                 </div>
                 
@@ -84,15 +108,78 @@ function SignUp(): React.JSX.Element {
               
               <div className="signup-form">
                 <h1>Registrar Vivienda*</h1>
+                
                 <div className="form-group">
-                  <label htmlFor="direccion">Dirección de la Casa*</label>
+                  <label htmlFor="pais">País*</label>
                   <input 
                     type="text" 
-                    id="direccion" 
-                    name="direccion" 
-                    placeholder="Calle, número, colonia, ciudad"
+                    id="pais" 
+                    name="pais" 
+                    placeholder="México"
+                    value="México"
                     required 
                   />
+                </div>
+                
+                <div className="address-fields-group">
+                  <div className="form-group">
+                    <label htmlFor="estado">Estado*</label>
+                    <input 
+                      type="text" 
+                      id="estado" 
+                      name="estado" 
+                      placeholder="Ingresa el estado"
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="municipio">Municipio*</label>
+                    <input 
+                      type="text" 
+                      id="municipio" 
+                      name="municipio" 
+                      placeholder="Ingresa el municipio"
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="calle">Calle*</label>
+                    <input 
+                      type="text" 
+                      id="calle" 
+                      name="calle" 
+                      placeholder="Nombre de la calle"
+                      required 
+                    />
+                  </div>
+                </div>
+                
+                <div className="address-fields-group">
+                  <div className="form-group">
+                    <label htmlFor="numero">Número*</label>
+                    <input 
+                      type="text" 
+                      id="numero" 
+                      name="numero" 
+                      placeholder="Número exterior e interior"
+                      required 
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="codigoPostal">C.P.*</label>
+                    <input 
+                      type="text" 
+                      id="codigoPostal" 
+                      name="codigoPostal" 
+                      placeholder="Código postal"
+                      maxLength={5}
+                      pattern="[0-9]{5}"
+                      required 
+                    />
+                  </div>
                 </div>
                 
                 <div className="form-group">
