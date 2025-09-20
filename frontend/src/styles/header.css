@@ -1,0 +1,33 @@
+.headerContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.logoTitle {
+    display: flex;
+    align-items: center;    
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+ul {
+    display: flex;
+    list-style-type: none;
+    gap: 15px;
+    
+}
+
+a {
+    text-decoration: none;
+    color: black;
+    font-weight: 500;
+    transition: font-size 0.3s;
+}
+
+a:hover {
+    font-size: larger;
+    text-shadow: 1px 1px 2px gray;
+}
