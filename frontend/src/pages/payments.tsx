@@ -133,7 +133,14 @@ function Payments(): React.JSX.Element {
                     <div className="table-cell actions">
                       <button className="action-btn view">Ver</button>
                       {payment.status === 'Pendiente' && (
-                        <button className="action-btn pay">Pagar</button>
+                        <button 
+                          className="action-btn pay"
+                          onClick={() => {
+                            window.location.href = `/procespayments?service=${payment.service}&amount=${payment.amount}&id=${payment.id}`;
+                          }}
+                        >
+                          Pagar
+                        </button>
                       )}
                     </div>
                   </div>

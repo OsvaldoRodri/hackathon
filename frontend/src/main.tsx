@@ -7,6 +7,7 @@ import Implement from './pages/implement';
 import About from './pages/about';
 import Login from './pages/login';
 import Payments from './pages/payments';
+import ProcesPayments from './pages/procespayments';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/payments" element={<Payments />} />
+        <Route path="/procespayments" element={<ProcesPayments />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
