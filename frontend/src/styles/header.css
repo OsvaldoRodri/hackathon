@@ -19,7 +19,6 @@ header {
     margin: 0 auto;
 }
 
-/*Quick un color Pay otro color*/
 .logoTitle {
     display: flex;
     align-items: center;
@@ -74,7 +73,7 @@ header {
     background: rgba(255, 255, 255, 0.25);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    font-size: 1.6rem; /* Mantener el tamaño consistente */
+    font-size: 1.52rem; /* Mantener el tamaño consistente */
 }
 
 /* Responsivo */

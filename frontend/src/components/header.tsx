@@ -32,10 +32,10 @@ function Header(){
             <div className="navBar">
                 <nav>
                     <ul>
-                        <li><Link to="#home">Página inicial</Link></li>
-                        <li><Link to="#contact">Implementar QuickPay</Link></li>
-                        <li><Link to="#about">Sobre nosotros</Link></li>
-                        <li><Link to="#login">Ayuda</Link></li>
+                        <li><Link to="/">Página principal</Link></li>
+                        <li><Link to="/implement">Implementar QuickPay</Link></li>
+                        <li><Link to="/about">Sobre nosotros</Link></li>
+                        <li><Link to="/help">Ayuda</Link></li>
                     </ul>
                 </nav>
             </div>
