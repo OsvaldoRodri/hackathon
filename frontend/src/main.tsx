@@ -12,6 +12,7 @@ import Admin from './pages/admin';
 import Treasurer from './pages/treasurer';
 import AdminViviendas from './pages/admin-viviendas';
 import AdminUsuarios from './pages/admin-usuarios';
+import AdminWallets from './pages/admin-wallets';
 import Help from './pages/help';
 
 createRoot(document.getElementById('root')!).render(
@@ -28,6 +29,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/viviendas" element={<AdminViviendas />} />
         <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+        <Route path="/admin/wallets" element={<AdminWallets />} />
         <Route path="/treasurer" element={<Treasurer />} />
         <Route path="/help" element={<Help />} />
       </Routes>

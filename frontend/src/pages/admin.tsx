@@ -102,6 +102,23 @@ function Admin(): React.JSX.Element {
                 </div>
               </div>
 
+              {/* Gestión de Wallets */}
+              <div className="admin-card">
+                <div className="card-icon">💳</div>
+                <div className="card-content">
+                  <h3>Gestión de Wallets</h3>
+                  <p>Agregar y gestionar wallets para pagos digitales</p>
+                  <div className="card-actions">
+                    <button 
+                      className="action-btn primary"
+                      onClick={() => navigate('/admin/wallets')}
+                    >
+                      Gestionar Wallets
+                    </button>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
           </div>
