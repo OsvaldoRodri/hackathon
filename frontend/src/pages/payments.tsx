@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/App.css';
 import '../styles/payments.css';
 import Header from '../components/header';
 import Footer from '../components/footer';
 
 function Payments(): React.JSX.Element {
+  const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState('');
   const [payments] = useState([
     {
@@ -136,7 +138,7 @@ function Payments(): React.JSX.Element {
                         <button 
                           className="action-btn pay"
                           onClick={() => {
-                            window.location.href = `/procespayments?service=${payment.service}&amount=${payment.amount}&id=${payment.id}`;
+                            navigate(`/procespayments?service=${payment.service}&amount=${payment.amount}&id=${payment.id}`);
                           }}
                         >
                           Pagar

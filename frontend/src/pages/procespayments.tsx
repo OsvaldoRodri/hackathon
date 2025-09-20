@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './procespayments.css';
 
 const ProcesPayments: React.FC = () => {
+  const navigate = useNavigate();
   const [walletCode, setWalletCode] = useState('');
   const [amount, setAmount] = useState('');
   const [paymentConcept, setPaymentConcept] = useState('');
@@ -10,9 +12,9 @@ const ProcesPayments: React.FC = () => {
 
   useEffect(() => {
     // Verificar autenticación
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('userToken');
     if (!token) {
-      window.location.href = '/login';
+      navigate('/login');
       return;
     }
 
@@ -46,7 +48,7 @@ const ProcesPayments: React.FC = () => {
       
       // Simular procesamiento exitoso
       alert('¡Pago procesado exitosamente!');
-      window.location.href = '/payments';
+      navigate('/payments');
     } catch (err) {
       setError('Error al procesar el pago. Intente nuevamente.');
     } finally {
@@ -55,7 +57,7 @@ const ProcesPayments: React.FC = () => {
   };
 
   const handleCancel = () => {
-    window.location.href = '/payments';
+    navigate('/payments');
   };
 
   return (
@@ -69,8 +71,9 @@ const ProcesPayments: React.FC = () => {
           <button 
             className="btn-logout"
             onClick={() => {
-              localStorage.removeItem('authToken');
-              window.location.href = '/';
+              localStorage.removeItem('userToken');
+              localStorage.removeItem('userEmail');
+              navigate('/');
             }}
           >
             Cerrar sesión
