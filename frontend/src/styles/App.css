@@ -9,6 +9,14 @@
 html, body, #root{
   height: 100%;
   margin: 0;
+  background: linear-gradient(135deg, 
+    #667eea 0%, 
+    #764ba2 25%, 
+    #f093fb 50%, 
+    #f5576c 75%, 
+    #4facfe 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
 }
 
 /* Contenedor principal (2x2) */
@@ -28,20 +36,32 @@ html, body, #root{
 .top-right,
 .bottom-left,
 .bottom-right{
-  background: #f7f7fb;
-  border: 1px solid #e9e9ef;
+  background: rgba(247, 247, 251, 0.95);
+  border: 1px solid rgba(233, 233, 239, 0.3);
+  backdrop-filter: blur(10px);
   border-radius: var(--radius);
   padding: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.top-left:hover,
+.top-right:hover,
+.bottom-left:hover,
+.bottom-right:hover{
+  background: rgba(255, 255, 255, 0.98);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 /* Superior izquierdo: texto */
 .top-left{
   text-align: left;
 }
-.top-left h2{
+.top-left h1{
   margin: 0;
   line-height: 1.2;
   font-size: clamp(1.25rem, 2.5vw, 2rem);
@@ -67,13 +87,13 @@ html, body, #root{
   box-shadow: 0 6px 20px rgba(0,0,0,.08);
 }
 .top-right button:first-of-type{
-  /* Registrar */
+  /* Soy Nuevo */
   background: #111827;
   color: #fff;
   border-color: #111827;
 }
 .top-right button:last-of-type{
-  /* Acceder a pagos */
+  /* Ver mis pagos */
   background: #ffffff;
   color: #111827;
 }
@@ -81,12 +101,36 @@ html, body, #root{
 /* Inferior izquierdo: imagen */
 .bottom-left{
   overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  padding: 0; /* Sin padding para que la imagen ocupe todo el espacio */
 }
 .bottom-left img{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: calc(var(--radius) - 4px);
+  border-radius: calc(var(--radius) - 1px);
+  transition: transform 0.3s ease;
+  display: block;
+}
+.bottom-left img:hover{
+  transform: scale(1.02);
+}
+.bottom-left::before{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: calc(var(--radius) - 1px);
+  pointer-events: none;
+}
+.bottom-left:hover::before{
+  opacity: 1;
 }
 
 /* Inferior derecho: Nosotros */
@@ -115,6 +159,22 @@ html, body, #root{
   }
 }
 
+/* Animaciones */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: no-preference){
+  a:nth-of-type(2) .logo{ animation: logo-spin infinite 20s linear; }
+}
+
 /* (Opcional) estilos de logo del template de Vite, por si aún lo usas */
 .logo {
   height: 6em;
@@ -124,10 +184,3 @@ html, body, #root{
 }
 .logo:hover { filter: drop-shadow(0 0 2em #646cffaa); }
 .logo.react:hover { filter: drop-shadow(0 0 2em #61dafbaa); }
-@keyframes logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-@media (prefers-reduced-motion: no-preference){
-  a:nth-of-type(2) .logo{ animation: logo-spin infinite 20s linear; }
-}

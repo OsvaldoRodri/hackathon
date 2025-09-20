@@ -1,5 +1,5 @@
 import React from 'react';
-import '/styles/App.css'
+import './styles/App.css';
 
 function App(): React.JSX.Element {
   return (
@@ -17,7 +17,7 @@ function App(): React.JSX.Element {
 
       {/* Inferior Izquierdo */}
       <div className="bottom-left">
-        <img src="ruta_de_tu_imagen.png" alt="Imagen ilustrativa" />
+        <img src="/persona.png" alt="Persona realizando pagos de servicios" />
       </div>
 
       {/* Inferior Derecho */}
@@ -27,5 +27,7 @@ function App(): React.JSX.Element {
         <p>Ofrecemos una plataforma sencilla y accesible para que los usuarios puedan gestionar sus pagos de manera eficiente.</p>
       </div>
     </div>
-    )
+  );
+}
+
 export default App;
