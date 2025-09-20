@@ -15,10 +15,13 @@ function App(): React.JSX.Element {
             <h1>Realiza los pagos de tus servicios de luz y agua</h1>
           </div>
 
-          {/* Superior Derecho */}
+          {/* Superior Derecho boton con link a sign-up y payments */}
           <div className="top-right">
-            <button>Soy Nuevo</button>
-            <button>Ver mis pagos</button>
+            <button onClick={() => {window.location.href="/sign-up"}}>Soy Nuevo
+
+            </button>
+            <button onClick={() => {window.location.href="/payments"}}>Ver mis pagos
+            </button>
           </div>
 
           {/* Inferior Izquierdo */}
