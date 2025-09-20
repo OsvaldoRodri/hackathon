@@ -1,0 +1,133 @@
+/* Layout base */
+:root{
+  --gap: 24px;
+  --radius: 16px;
+}
+
+*{ box-sizing: border-box; }
+
+html, body, #root{
+  height: 100%;
+  margin: 0;
+}
+
+/* Contenedor principal (2x2) */
+.container{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: var(--gap);
+  min-height: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Cuadrantes */
+.top-left,
+.top-right,
+.bottom-left,
+.bottom-right{
+  background: #f7f7fb;
+  border: 1px solid #e9e9ef;
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Superior izquierdo: texto */
+.top-left{
+  text-align: left;
+}
+.top-left h2{
+  margin: 0;
+  line-height: 1.2;
+  font-size: clamp(1.25rem, 2.5vw, 2rem);
+  font-weight: 700;
+}
+
+/* Superior derecho: botones */
+.top-right{
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.top-right button{
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 1px solid #dcdce6;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+}
+.top-right button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.08);
+}
+.top-right button:first-of-type{
+  /* Registrar */
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+.top-right button:last-of-type{
+  /* Acceder a pagos */
+  background: #ffffff;
+  color: #111827;
+}
+
+/* Inferior izquierdo: imagen */
+.bottom-left{
+  overflow: hidden;
+}
+.bottom-left img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: calc(var(--radius) - 4px);
+}
+
+/* Inferior derecho: Nosotros */
+.bottom-right{
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 8px;
+}
+.bottom-right h3{
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.bottom-right p{
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* Responsivo: apila en 1 columna en pantallas chicas */
+@media (max-width: 820px){
+  .container{
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+}
+
+/* (Opcional) estilos de logo del template de Vite, por si aún lo usas */
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover { filter: drop-shadow(0 0 2em #646cffaa); }
+.logo.react:hover { filter: drop-shadow(0 0 2em #61dafbaa); }
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: no-preference){
+  a:nth-of-type(2) .logo{ animation: logo-spin infinite 20s linear; }
+}
