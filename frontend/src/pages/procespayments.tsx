@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './procespayments.css';
+import '../styles/admin-management.css'; // Para usar los estilos del modal
 
 const ProcesPayments: React.FC = () => {
   const navigate = useNavigate();
-  const [walletCode, setWalletCode] = useState('');
+  const [walletName, setWalletName] = useState('');
+  const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [paymentConcept, setPaymentConcept] = useState('');
+  const [service, setService] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     // Verificar autenticación
@@ -27,15 +30,18 @@ const ProcesPayments: React.FC = () => {
       setAmount(amountFromUrl.replace('$', ''));
     }
     if (serviceFromUrl) {
-      setPaymentConcept(serviceFromUrl);
+      setService(serviceFromUrl);
     }
-  }, []);
+    
+    // Mostrar el modal al cargar la página
+    setShowPaymentModal(true);
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
-    if (!walletCode || !amount || !paymentConcept) {
+    if (!walletName || !description) {
       setError('Todos los campos son obligatorios');
       return;
     }
@@ -57,6 +63,7 @@ const ProcesPayments: React.FC = () => {
   };
 
   const handleCancel = () => {
+    setShowPaymentModal(false);
     navigate('/payments');
   };
 
@@ -82,94 +89,117 @@ const ProcesPayments: React.FC = () => {
       </div>
 
       <div className="main-content">
-        <div className="payment-form-container">
-          <div className="form-header">
-            <h1>Procesar Pago</h1>
-            <p>Complete la información para procesar su pago</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="payment-form">
-            {error && <div className="error-message">{error}</div>}
-            
-            <div className="form-group">
-              <label htmlFor="walletCode">Código de Billetera</label>
-              <input
-                type="text"
-                id="walletCode"
-                value={walletCode}
-                onChange={(e) => setWalletCode(e.target.value)}
-                placeholder="Ingrese el código de su billetera"
-                required
-              />
+        <div className="payment-info-display">
+          <h2>Procesando Pago</h2>
+          <div className="payment-details">
+            <div className="detail-item">
+              <span className="label">Servicio:</span>
+              <span className="value">{service}</span>
             </div>
-
-            <div className="form-group">
-              <label htmlFor="amount">Monto a Pagar</label>
-              <div className="amount-input-container">
-                <span className="currency-symbol">$</span>
-                <input
-                  type="number"
-                  id="amount"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="paymentConcept">Concepto de Pago</label>
-              <textarea
-                id="paymentConcept"
-                value={paymentConcept}
-                onChange={(e) => setPaymentConcept(e.target.value)}
-                placeholder="Describa el concepto del pago"
-                rows={3}
-                required
-              />
-            </div>
-
-            <div className="form-actions">
-              <button 
-                type="button" 
-                className="btn-cancel"
-                onClick={handleCancel}
-                disabled={isProcessing}
-              >
-                Cancelar
-              </button>
-              <button 
-                type="submit" 
-                className="btn-submit"
-                disabled={isProcessing}
-              >
-                {isProcessing ? 'Procesando...' : 'Procesar Pago'}
-              </button>
-            </div>
-          </form>
-
-          <div className="payment-info">
-            <div className="info-card">
-              <h3>Información del Pago</h3>
-              <div className="info-item">
-                <span className="label">Monto:</span>
-                <span className="value">${amount || '0.00'}</span>
-              </div>
-              <div className="info-item">
-                <span className="label">Concepto:</span>
-                <span className="value">{paymentConcept || 'Sin especificar'}</span>
-              </div>
-              <div className="info-item">
-                <span className="label">Estado:</span>
-                <span className="value status-pending">Pendiente</span>
-              </div>
+            <div className="detail-item">
+              <span className="label">Monto:</span>
+              <span className="value">${amount}</span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modal de configuración de wallet */}
+      {showPaymentModal && (
+        <div className="wallet-modal-overlay">
+          <div className="wallet-modal">
+            <div className="wallet-modal-header">
+              <div className="modal-icon">
+                <span>💰</span>
+              </div>
+              <h2>Configurar Pago</h2>
+              <p>Conecta tu wallet para procesar el pago</p>
+              <button 
+                className="modal-close-button"
+                onClick={handleCancel}
+                aria-label="Cerrar modal"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="wallet-modal-body">
+              <form onSubmit={handleSubmit} className="wallet-form">
+                {error && <div className="error-message">{error}</div>}
+                
+                <div className="input-group">
+                  <div className="input-icon">🔗</div>
+                  <div className="input-content">
+                    <label>Conectar Wallet de Interledger</label>
+                    <a 
+                      href="https://interledger.org/setup-wallet" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="wallet-connect-link"
+                    >
+                      🚀 Configurar tu Wallet Interledger
+                    </a>
+                    <span className="input-help">
+                      Haz clic para configurar o conectar tu wallet Interledger
+                    </span>
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <div className="input-icon">🏷️</div>
+                  <div className="input-content">
+                    <label htmlFor="walletName">Nombre de la Wallet</label>
+                    <input
+                      type="text"
+                      id="walletName"
+                      name="walletName"
+                      value={walletName}
+                      onChange={(e) => setWalletName(e.target.value)}
+                      placeholder="Mi Wallet Principal"
+                      required
+                      maxLength={50}
+                    />
+                    <span className="input-help">
+                      Nombre identificativo para tu wallet
+                    </span>
+                  </div>
+                </div>
+
+                <div className="input-group">
+                  <div className="input-icon">📝</div>
+                  <div className="input-content">
+                    <label htmlFor="description">Descripción</label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Describe el propósito de esta transacción..."
+                      required
+                      rows={3}
+                      maxLength={200}
+                    />
+                    <span className="input-help">
+                      Detalles adicionales • {200 - description.length} caracteres restantes
+                    </span>
+                  </div>
+                </div>
+
+                <div className="modal-actions">
+                  <button type="button" onClick={handleCancel} className="btn-secondary">
+                    <span>↩️</span>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn-primary" disabled={isProcessing}>
+                    <span>💳</span>
+                    {isProcessing ? 'Procesando...' : 'Procesar Pago'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer className="footer">
         <div className="footer-content">

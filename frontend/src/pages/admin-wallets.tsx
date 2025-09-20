@@ -5,34 +5,24 @@ import '../styles/admin-management.css';
 import Header from '../components/header';
 import Footer from '../components/footer';
 
+interface Wallet {
+  id: number;
+  walletKey: string;
+  ownerName: string;
+  description: string;
+}
+
 function AdminWallets(): React.JSX.Element {
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState('');
   const [showAddWalletForm, setShowAddWalletForm] = useState(false);
-  const [wallets, setWallets] = useState([
-    {
-      id: 1,
-      walletKey: '1A2B3C4D5E6F7G8H9I0J',
-      amount: 5000.00,
-      concept: 'Mantenimiento General Septiembre 2025',
-      dateCreated: '2025-09-15',
-      status: 'Activa'
-    },
-    {
-      id: 2,
-      walletKey: 'K1L2M3N4O5P6Q7R8S9T0',
-      amount: 1500.50,
-      concept: 'Reparación de Jardines',
-      dateCreated: '2025-09-10',
-      status: 'Activa'
-    }
-  ]);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
 
   // Estados para el formulario
   const [newWallet, setNewWallet] = useState({
     walletKey: '',
-    amount: '',
-    concept: ''
+    ownerName: '',
+    description: ''
   });
 
   useEffect(() => {
@@ -73,19 +63,17 @@ function AdminWallets(): React.JSX.Element {
     const newWalletItem = {
       id: wallets.length + 1,
       walletKey: newWallet.walletKey,
-      amount: parseFloat(newWallet.amount),
-      concept: newWallet.concept,
-      dateCreated: new Date().toISOString().split('T')[0],
-      status: 'Activa'
+      ownerName: newWallet.ownerName,
+      description: newWallet.description
     };
     
     setWallets([...wallets, newWalletItem]);
-    setNewWallet({ walletKey: '', amount: '', concept: '' });
+    setNewWallet({ walletKey: '', ownerName: '', description: '' });
     setShowAddWalletForm(false);
   };
 
   const handleCancel = () => {
-    setNewWallet({ walletKey: '', amount: '', concept: '' });
+    setNewWallet({ walletKey: '', ownerName: '', description: '' });
     setShowAddWalletForm(false);
   };
 
@@ -128,80 +116,97 @@ function AdminWallets(): React.JSX.Element {
 
             {/* Formulario para agregar wallet */}
             {showAddWalletForm && (
-              <div className="form-overlay">
-                <div className="form-container">
-                  <div className="form-header">
-                    <h2>Agregar Nueva Wallet</h2>
+              <div className="wallet-modal-overlay">
+                <div className="wallet-modal">
+                  <div className="wallet-modal-header">
+                    <div className="modal-icon">
+                      <span>💳</span>
+                    </div>
+                    <h2>Nueva Wallet</h2>
+                    <p>Agrega una nueva wallet al sistema</p>
                     <button 
-                      className="close-button"
+                      className="modal-close-button"
                       onClick={handleCancel}
+                      aria-label="Cerrar modal"
                     >
                       ✕
                     </button>
                   </div>
                   
-                  <form onSubmit={handleSubmit} className="wallet-form">
-                    <div className="form-group">
-                      <label htmlFor="walletKey">Key de la Wallet*</label>
-                      <input
-                        type="text"
-                        id="walletKey"
-                        name="walletKey"
-                        value={newWallet.walletKey}
-                        onChange={handleInputChange}
-                        placeholder="Ej: 1A2B3C4D5E6F7G8H9I0J"
-                        required
-                        maxLength={50}
-                      />
-                      <small className="form-hint">
-                        Ingresa la clave única de la wallet (máximo 50 caracteres)
-                      </small>
-                    </div>
+                  <div className="wallet-modal-body">
+                    <form onSubmit={handleSubmit} className="wallet-form">
+                      <div className="input-group">
+                        <div className="input-icon">🔑</div>
+                        <div className="input-content">
+                          <label htmlFor="walletKey">Key de la Wallet</label>
+                          <input
+                            type="text"
+                            id="walletKey"
+                            name="walletKey"
+                            value={newWallet.walletKey}
+                            onChange={handleInputChange}
+                            placeholder="$ilp.interledger-test.dev/a1738327"
+                            required
+                            maxLength={100}
+                          />
+                          <span className="input-help">
+                            Formato: $ilp.interledger-test.dev/account
+                          </span>
+                        </div>
+                      </div>
 
-                    <div className="form-group">
-                      <label htmlFor="amount">Monto a Pagar*</label>
-                      <input
-                        type="number"
-                        id="amount"
-                        name="amount"
-                        value={newWallet.amount}
-                        onChange={handleInputChange}
-                        placeholder="0.00"
-                        min="0"
-                        step="0.01"
-                        required
-                      />
-                      <small className="form-hint">
-                        Cantidad en pesos mexicanos (MXN)
-                      </small>
-                    </div>
+                      <div className="input-group">
+                        <div className="input-icon">👤</div>
+                        <div className="input-content">
+                          <label htmlFor="ownerName">Propietario</label>
+                          <input
+                            type="text"
+                            id="ownerName"
+                            name="ownerName"
+                            value={newWallet.ownerName}
+                            onChange={handleInputChange}
+                            placeholder="Nombre completo del propietario"
+                            required
+                            maxLength={100}
+                          />
+                          <span className="input-help">
+                            Nombre de la persona propietaria
+                          </span>
+                        </div>
+                      </div>
 
-                    <div className="form-group">
-                      <label htmlFor="concept">Concepto de Pago*</label>
-                      <textarea
-                        id="concept"
-                        name="concept"
-                        value={newWallet.concept}
-                        onChange={handleInputChange}
-                        placeholder="Describe el concepto del pago..."
-                        required
-                        rows={3}
-                        maxLength={200}
-                      />
-                      <small className="form-hint">
-                        Descripción del pago (máximo 200 caracteres)
-                      </small>
-                    </div>
+                      <div className="input-group">
+                        <div className="input-icon">📝</div>
+                        <div className="input-content">
+                          <label htmlFor="description">Descripción</label>
+                          <textarea
+                            id="description"
+                            name="description"
+                            value={newWallet.description}
+                            onChange={handleInputChange}
+                            placeholder="Describe el uso o propósito de esta wallet..."
+                            required
+                            rows={3}
+                            maxLength={200}
+                          />
+                          <span className="input-help">
+                            Máximo 200 caracteres • {200 - newWallet.description.length} restantes
+                          </span>
+                        </div>
+                      </div>
 
-                    <div className="form-actions">
-                      <button type="button" onClick={handleCancel} className="cancel-button">
-                        Cancelar
-                      </button>
-                      <button type="submit" className="submit-button">
-                        Agregar Wallet
-                      </button>
-                    </div>
-                  </form>
+                      <div className="modal-actions">
+                        <button type="button" onClick={handleCancel} className="btn-secondary">
+                          <span>↩️</span>
+                          Cancelar
+                        </button>
+                        <button type="submit" className="btn-primary">
+                          <span>💾</span>
+                          Agregar Wallet
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               </div>
             )}
@@ -219,11 +224,8 @@ function AdminWallets(): React.JSX.Element {
                     <tr>
                       <th>ID</th>
                       <th>Key de Wallet</th>
-                      <th>Monto</th>
-                      <th>Concepto</th>
-                      <th>Fecha Creación</th>
-                      <th>Estado</th>
-                      <th>Acciones</th>
+                      <th>Propietario</th>
+                      <th>Descripción</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -233,35 +235,16 @@ function AdminWallets(): React.JSX.Element {
                         <td className="wallet-key">
                           <code>{wallet.walletKey}</code>
                         </td>
-                        <td className="amount">
-                          ${wallet.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        <td className="owner-name">
+                          {wallet.ownerName}
                         </td>
-                        <td className="concept">
-                          <span title={wallet.concept}>
-                            {wallet.concept.length > 40 
-                              ? `${wallet.concept.substring(0, 40)}...` 
-                              : wallet.concept
+                        <td className="description">
+                          <span title={wallet.description}>
+                            {wallet.description.length > 40 
+                              ? `${wallet.description.substring(0, 40)}...` 
+                              : wallet.description
                             }
                           </span>
-                        </td>
-                        <td>{new Date(wallet.dateCreated).toLocaleDateString('es-MX')}</td>
-                        <td>
-                          <span className={`status-badge ${wallet.status.toLowerCase()}`}>
-                            {wallet.status}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="action-buttons">
-                            <button className="edit-button" title="Editar">
-                              ✏️
-                            </button>
-                            <button className="delete-button" title="Eliminar">
-                              🗑️
-                            </button>
-                            <button className="view-button" title="Ver detalles">
-                              👁️
-                            </button>
-                          </div>
                         </td>
                       </tr>
                     ))}

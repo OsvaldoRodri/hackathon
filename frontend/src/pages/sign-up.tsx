@@ -109,18 +109,6 @@ function SignUp(): React.JSX.Element {
               <div className="signup-form">
                 <h1>Registrar Vivienda*</h1>
                 
-                <div className="form-group">
-                  <label htmlFor="pais">País*</label>
-                  <input 
-                    type="text" 
-                    id="pais" 
-                    name="pais" 
-                    placeholder="México"
-                    value="México"
-                    required 
-                  />
-                </div>
-                
                 <div className="address-fields-group">
                   <div className="form-group">
                     <label htmlFor="estado">Estado*</label>
@@ -140,6 +128,17 @@ function SignUp(): React.JSX.Element {
                       id="municipio" 
                       name="municipio" 
                       placeholder="Ingresa el municipio"
+                      required 
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="colonia">Colonia*</label>
+                    <input 
+                      type="text" 
+                      id="colonia" 
+                      name="colonia" 
+                      placeholder="Ingresa la colonia"
                       required 
                     />
                   </div>
@@ -189,37 +188,6 @@ function SignUp(): React.JSX.Element {
                     <option value="casa">Casa</option>
                     <option value="departamento">Departamento</option>
                     <option value="negocio">Negocio</option>
-                  </select>
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="owner">Nombre del Propietario*</label>
-                  <input 
-                    type="text" 
-                    id="owner" 
-                    name="owner" 
-                    placeholder="Nombre completo del propietario"
-                    required 
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="numeroMedidorLuz">Número de Medidor de Luz*</label>
-                  <input 
-                    type="text" 
-                    id="numeroMedidorLuz" 
-                    name="numeroMedidorLuz" 
-                    placeholder="Número del medidor eléctrico"
-                    required 
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="medidorAgua">¿Cuenta con medidor de agua?*</label>
-                  <select id="medidorAgua" name="medidorAgua" required>
-                    <option value="">Selecciona una opción</option>
-                    <option value="si">Sí</option>
-                    <option value="no">No</option>
                   </select>
                 </div>
                 

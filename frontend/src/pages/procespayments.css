@@ -55,6 +55,62 @@
   padding: 2rem;
 }
 
+/* Nueva sección de información de pago */
+.payment-info-display {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.payment-info-display h2 {
+  color: white;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.payment-details {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 150px;
+}
+
+.detail-item .label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.detail-item .value {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* Estilos para mensaje de error en el modal */
+.error-message {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .payment-form-container {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
