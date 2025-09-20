@@ -1,0 +1,103 @@
+import { Sequelize, DataTypes, Model } from 'sequelize';
+import dotenv from 'dotenv';
+dotenv.config();
+// Configuración de la base de datos
+const sequelize = new Sequelize(process.env.DB_NAME || 'condominios_db', process.env.DB_USER || 'root', process.env.DB_PASSWORD || '', {
+    host: process.env.DB_HOST || 'localhost',
+    dialect: 'mysql',
+    logging: false
+});
+// Modelo Usuario (con roles: dueno, admin, tesorero)
+export class Usuario extends Model {
+    id;
+    nombre;
+    apellido;
+    email;
+    password;
+    telefono;
+    cedula;
+    rol;
+    activo;
+    fechaRegistro;
+}
+Usuario.init({
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    nombre: { type: DataTypes.STRING, allowNull: false },
+    apellido: { type: DataTypes.STRING, allowNull: false },
+    email: { type: DataTypes.STRING, unique: true, allowNull: false },
+    password: { type: DataTypes.STRING, allowNull: false },
+    telefono: { type: DataTypes.STRING },
+    cedula: { type: DataTypes.STRING, unique: true, allowNull: false },
+    rol: {
+        type: DataTypes.ENUM('dueno', 'admin', 'tesorero'),
+        allowNull: false,
+        defaultValue: 'dueno',
+        comment: 'Rol del usuario: dueno (propietario), admin (administrador), tesorero (finanzas)'
+    },
+    activo: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+        comment: 'Si false, el usuario no puede acceder al sistema'
+    },
+    fechaRegistro: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, { sequelize, modelName: 'usuario' });
+// Modelo Domicilio
+export class Domicilio extends Model {
+    id;
+    numero;
+    bloque;
+    area;
+    tipo;
+    duenoId;
+}
+Domicilio.init({
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    numero: { type: DataTypes.STRING, allowNull: false },
+    bloque: { type: DataTypes.STRING },
+    area: { type: DataTypes.FLOAT },
+    tipo: { type: DataTypes.ENUM('apartamento', 'casa', 'local'), allowNull: false },
+    duenoId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: { model: Usuario, key: 'id' },
+        comment: 'Referencia al usuario propietario (rol: dueno)'
+    }
+}, { sequelize, modelName: 'domicilio' });
+// Modelo Recibos
+export class Recibo extends Model {
+    id;
+    numero;
+    concepto;
+    monto;
+    fechaVencimiento;
+    fechaPago;
+    estado;
+    domicilioId;
+}
+Recibo.init({
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    numero: { type: DataTypes.STRING, unique: true, allowNull: false },
+    concepto: { type: DataTypes.STRING, allowNull: false },
+    monto: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+    fechaVencimiento: { type: DataTypes.DATE, allowNull: false },
+    fechaPago: { type: DataTypes.DATE, allowNull: true },
+    estado: {
+        type: DataTypes.ENUM('pendiente', 'pagado', 'vencido'),
+        defaultValue: 'pendiente'
+    },
+    domicilioId: { type: DataTypes.INTEGER, references: { model: Domicilio, key: 'id' } }
+}, { sequelize, modelName: 'recibo' });
+// Relaciones
+Usuario.hasMany(Domicilio, {
+    foreignKey: 'duenoId',
+    as: 'propiedades',
+    scope: { rol: 'dueno' }
+});
+Domicilio.belongsTo(Usuario, {
+    foreignKey: 'duenoId',
+    as: 'propietario'
+});
+Domicilio.hasMany(Recibo, { foreignKey: 'domicilioId' });
+Recibo.belongsTo(Domicilio, { foreignKey: 'domicilioId' });
+export { sequelize };
+//# sourceMappingURL=index.js.map
