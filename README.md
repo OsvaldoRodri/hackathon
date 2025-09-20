@@ -1,4 +1,4 @@
-# ComuniPago
+# QuickPay
 
 Plataforma de pagos comunitarios para servicios básicos (agua, luz) en comunidades rurales.  
 Simplifica los cobros, genera recibos digitales y permite pagos desde SMS, WhatsApp o domiciliación.
