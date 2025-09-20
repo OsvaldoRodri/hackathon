@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/App.css';
 import Header from './components/header';
 import Footer from './components/footer';
 
 function App(): React.JSX.Element {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Verificar si el usuario está logueado (simulamos con localStorage)
+  useEffect(() => {
+    const userToken = localStorage.getItem('userToken');
+    setIsLoggedIn(!!userToken);
+  }, []);
+
+  // Función para manejar el clic en "Ver mis pagos"
+  const handleViewPayments = () => {
+    if (isLoggedIn) {
+      window.location.href = "/payments";
+    } else {
+      window.location.href = "/login";
+    }
+  };
+
   return (
     <>
       <Header />
@@ -20,7 +37,8 @@ function App(): React.JSX.Element {
             <button onClick={() => {window.location.href="/sign-up"}}>Soy Nuevo
 
             </button>
-            <button onClick={() => {window.location.href="/payments"}}>Ver mis pagos
+            <button onClick={handleViewPayments}>
+              {isLoggedIn ? "Ver mis pagos" : "Ver mis pagos"}
             </button>
           </div>
 
