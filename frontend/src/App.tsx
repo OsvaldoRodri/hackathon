@@ -27,7 +27,5 @@ function App(): React.JSX.Element {
         <p>Ofrecemos una plataforma sencilla y accesible para que los usuarios puedan gestionar sus pagos de manera eficiente.</p>
       </div>
     </div>
-  );
-}
-
+    )
 export default App;
