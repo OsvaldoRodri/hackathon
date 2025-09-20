@@ -155,6 +155,11 @@ function SignUp(): React.JSX.Element {
           </div>
         </div>
         
+        {/* Texto central */}
+        <div className="center-text-signup">
+          <h2>¿Qué puedo hacer con QuickPays?</h2>
+        </div>
+        
         <div className="info-section">
           <div className="signup-container">
             <div className="signup-info">

@@ -334,3 +334,20 @@
     gap: 1rem;
   }
 }
+
+/* Texto central en la página de sign-up */
+.center-text-signup {
+  width: 100%;
+  max-width: 1200px;
+  text-align: center;
+}
+
+.center-text-signup h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 600;
+  color: #1a1a1a;
+  -webkit-background-clip: text;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}

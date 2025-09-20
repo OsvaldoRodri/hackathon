@@ -48,10 +48,10 @@ main {
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   gap: var(--gap);
-  width: 900px; /* Mitad del tamaño anterior (1280px / 2) */
-  height: 620px; /* Altura fija más pequeña */
-  margin: 0 auto; /* Centrado horizontalmente */
-  padding: 3rem; /* Padding reducido */
+  width: 900px;
+  height: 620px;
+  margin: 0 auto;
+  padding: 3rem;
 }
 
 /* Cuadrantes */
@@ -63,11 +63,11 @@ main {
   border: 1px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(15px);
   border-radius: var(--radius);
-  padding: 18px; /* Reducido de 24px a 18px */
+  padding: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15); /* Sombra más pequeña */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }
 
@@ -109,7 +109,7 @@ main {
 .top-left h1{
   margin: 0;
   line-height: 1.2;
-  font-size: clamp(1.2rem, 2.2vw, 1.8rem); /* Aumentado significativamente */
+  font-size: clamp(1.2rem, 2.2vw, 1.8rem);
   font-weight: 700;
   color: #1a1a1a;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
@@ -117,17 +117,17 @@ main {
 
 /* Superior derecho: botones */
 .top-right{
-  gap: 12px; /* Aumentado el gap entre botones */
+  gap: 12px;
   flex-wrap: wrap;
 }
 .top-right button{
-  padding: 10px 16px; /* Aumentado el padding */
+  padding: 10px 16px;
   border-radius: 999px;
   border: 1px solid #dcdce6;
   background: white;
   cursor: pointer;
   font-weight: 600;
-  font-size: 1rem; /* Aumentado el tamaño de fuente */
+  font-size: 1rem;
   transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
 }
 .top-right button:hover{
@@ -150,7 +150,7 @@ main {
 .bottom-left{
   overflow: hidden;
   position: relative;
-  padding: 0; /* Sin padding para que la imagen ocupe todo el espacio */
+  padding: 0;
   /* El background ya está definido arriba */
 }
 .bottom-left img{
@@ -186,11 +186,11 @@ main {
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  gap: 8px; /* Aumentado el gap para mejor espaciado */
+  gap: 8px;
 }
 .bottom-right h3{
   margin: 0;
-  font-size: 1.3rem; /* Aumentado significativamente */
+  font-size: 1.3rem;
   font-weight: 700;
   color: #000000;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
@@ -198,20 +198,20 @@ main {
 .bottom-right p{
   margin: 0;
   color: #000000;
-  line-height: 1.5; /* Aumentado para mejor legibilidad */
-  font-size: 1rem; /* Aumentado el tamaño de fuente */
+  line-height: 1.5;
+  font-size: 1rem; 
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
 }
 
 /* Responsivo: apila en 1 columna en pantallas chicas */
 @media (max-width: 820px){
   .container{
-    width: 90vw; /* Usar viewport width en móviles */
-    height: auto; /* Altura automática */
+    width: 90vw;
+    height: auto;
     grid-template-columns: 1fr;
     grid-template-rows: auto;
-    position: fixed; /* Cambiar a fixed */
-    transform: none; /* Quitar transform en móviles */
+    position: fixed;
+    transform: none;
     top: auto;
     left: auto;
     margin-top: 2rem;
