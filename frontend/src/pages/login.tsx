@@ -28,12 +28,37 @@ function Login(): React.JSX.Element {
     // Simulamos la autenticación
     setTimeout(() => {
       if (formData.email && formData.password) {
-        // Guardar token de autenticación (simulado)
-        localStorage.setItem('userToken', 'demo-token-123');
-        localStorage.setItem('userEmail', formData.email);
+        // Definir credenciales de administrador y tesorero
+        const adminCredentials = {
+          email: 'admin@quickpay.com',
+          password: 'admin123'
+        };
         
-        // Redirigir a payments
-        window.location.href = "/payments";
+        const treasurerCredentials = {
+          email: 'tesorero@quickpay.com',
+          password: 'tesorero123'
+        };
+
+        // Verificar tipo de usuario y redirigir según corresponda
+        if (formData.email === adminCredentials.email && formData.password === adminCredentials.password) {
+          // Usuario administrador
+          localStorage.setItem('userToken', 'admin-token-456');
+          localStorage.setItem('userEmail', formData.email);
+          localStorage.setItem('userRole', 'admin');
+          window.location.href = "/admin";
+        } else if (formData.email === treasurerCredentials.email && formData.password === treasurerCredentials.password) {
+          // Usuario tesorero
+          localStorage.setItem('userToken', 'treasurer-token-789');
+          localStorage.setItem('userEmail', formData.email);
+          localStorage.setItem('userRole', 'treasurer');
+          window.location.href = "/treasurer";
+        } else {
+          // Usuario normal
+          localStorage.setItem('userToken', 'demo-token-123');
+          localStorage.setItem('userEmail', formData.email);
+          localStorage.setItem('userRole', 'user');
+          window.location.href = "/payments";
+        }
       } else {
         setError('Por favor completa todos los campos');
         setIsLoading(false);
@@ -78,8 +103,9 @@ function Login(): React.JSX.Element {
               <div className="demo-info">
                 <h3>🧪 Modo Demo</h3>
                 <p>
-                  Esta es una demostración. Puedes usar cualquier email y contraseña 
-                  para acceder al sistema.
+                  <strong>Usuario normal:</strong> Cualquier email y contraseña<br/>
+                  <strong>Administrador:</strong> admin@quickpay.com / admin123<br/>
+                  <strong>Tesorero:</strong> tesorero@quickpay.com / tesorero123
                 </p>
               </div>
             </div>

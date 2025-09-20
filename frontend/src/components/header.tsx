@@ -1,7 +1,34 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import "../styles/header.css"
 
 function Header(){
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userEmail, setUserEmail] = useState('');
+
+    useEffect(() => {
+        const token = localStorage.getItem('userToken');
+        const email = localStorage.getItem('userEmail');
+        setIsLoggedIn(!!token);
+        setUserEmail(email || '');
+    }, []);
+
+    const handleUserClick = () => {
+        if (isLoggedIn) {
+            window.location.href = "/payments";
+        } else {
+            window.location.href = "/login";
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userEmail');
+        setIsLoggedIn(false);
+        setUserEmail('');
+        window.location.href = "/";
+    };
+
     return (
     <header>
         <div className="headerContainer">
@@ -38,6 +65,49 @@ function Header(){
                         <li><Link to="/help">Ayuda</Link></li>
                     </ul>
                 </nav>
+            </div>
+            
+            {/* Usuario/Login Section */}
+            <div className="userSection">
+                <div className="userInfo" onClick={handleUserClick}>
+                    <svg 
+                        width="32" 
+                        height="32" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="userIcon"
+                    >
+                        <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                    <div className="userText">
+                        {isLoggedIn ? (
+                            <div className="loggedInUser">
+                                <span className="userName">{userEmail}</span>
+                            </div>
+                        ) : (
+                            <div className="notLoggedUser">
+                                <span className="loginText">Iniciar sesión</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                {isLoggedIn && (
+                    <button className="logoutBtn" onClick={handleLogout} title="Cerrar sesión">
+                        <svg 
+                            width="20" 
+                            height="20" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2"/>
+                            <polyline points="16,17 21,12 16,7" stroke="currentColor" strokeWidth="2"/>
+                            <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                    </button>
+                )}
             </div>
         </div>
     </header>

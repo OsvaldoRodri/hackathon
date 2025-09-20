@@ -12,11 +12,13 @@ header {
 
 .headerContainer {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
     align-items: center;
     padding: 1rem 2rem;
-    max-width: 1400px;
+    width: 90vw;
     margin: 0 auto;
+    gap: 1rem;
+    height: auto;
 }
 
 .logoTitle {
@@ -58,10 +60,16 @@ header {
     padding: 0;
 }
 
+.navBar {
+    display: flex;
+    align-items: center;
+    width: 45vw;
+}
+
 .navBar a {
     text-decoration: none;
     color: #ffffff;
-    font-weight: 500;
+    font-weight: 00;
     font-size: 1.5rem;
     padding: 0.5rem 1rem;
     border-radius: 20px;
@@ -74,6 +82,104 @@ header {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     font-size: 1.52rem; /* Mantener el tamaño consistente */
+}
+
+/* User Section Styles */
+.userSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    align-items: space-between;
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    min-width: fit-content;
+}
+
+.userInfo:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.userIcon {
+    color: #ffffff;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    transition: all 0.3s ease;
+}
+
+.userInfo:hover .userIcon {
+    color: #f0f9ff;
+    transform: scale(1.05);
+}
+
+.userText {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.loggedInUser {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.userName {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.notLoggedUser {
+    display: flex;
+    align-items: center;
+}
+
+.loginText {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.logoutBtn {
+    background: rgba(239, 68, 68, 0.8);
+    border: 1px solid rgba(239, 68, 68, 0.9);
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+}
+
+.logoutBtn:hover {
+    background: rgba(239, 68, 68, 1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.logoutBtn svg {
+    color: white;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 /* Responsivo */
@@ -93,6 +199,46 @@ header {
     .navBar a {
         font-size: 0.9rem;
         padding: 0.4rem 0.8rem;
+    }
+    
+    .userSection {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .userInfo {
+        flex: 1;
+        justify-content: center;
+        max-width: 300px;
+    }
+    
+    .userName {
+        max-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .headerContainer {
+        gap: 0.5rem;
+    }
+    
+    .userInfo {
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .userName {
+        font-size: 0.8rem;
+        max-width: 100px;
+    }
+    
+    .loginText {
+        font-size: 0.85rem;
+    }
+    
+    .userIcon {
+        width: 28px;
+        height: 28px;
     }
 }
 

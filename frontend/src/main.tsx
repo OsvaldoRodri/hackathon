@@ -8,6 +8,11 @@ import About from './pages/about';
 import Login from './pages/login';
 import Payments from './pages/payments';
 import ProcesPayments from './pages/procespayments';
+import Admin from './pages/admin';
+import Treasurer from './pages/treasurer';
+import AdminViviendas from './pages/admin-viviendas';
+import AdminUsuarios from './pages/admin-usuarios';
+import Help from './pages/help';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -20,6 +25,11 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/login" element={<Login />} />
         <Route path="/payments" element={<Payments />} />
         <Route path="/procespayments" element={<ProcesPayments />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/viviendas" element={<AdminViviendas />} />
+        <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+        <Route path="/treasurer" element={<Treasurer />} />
+        <Route path="/help" element={<Help />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
